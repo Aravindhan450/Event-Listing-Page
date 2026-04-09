@@ -57,10 +57,15 @@ function EventCard({ event }: { event: any }) {
 
 export default function Page() {
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeCategory, setActiveCategory] = useState('All');
 
-  const filteredEvents = events.filter((event: any) =>
-    event.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const categories = ['All', 'Development', 'DevOps', 'AI/ML', 'Cloud', 'Cybersecurity'];
+
+  const filteredEvents = events.filter((event: any) => {
+    const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = activeCategory === 'All' || event.category === activeCategory;
+    return matchesSearch && matchesCategory;
+  });
 
   return (
     <>
@@ -99,11 +104,19 @@ export default function Page() {
 <input className="w-full pl-12 pr-4 py-4 bg-surface-container-low border-none rounded-lg focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest transition-all text-on-surface" placeholder="Search frameworks, summits, or workshops..." type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}/>
 </div>
 <div className="flex flex-wrap justify-center gap-2 px-2">
-<button className="px-6 py-2 rounded-full bg-secondary-container text-on-secondary-container text-sm font-medium hover:bg-secondary-fixed transition-colors">Development</button>
-<button className="px-6 py-2 rounded-full bg-surface-container-high text-on-surface-variant text-sm font-medium hover:bg-secondary-container transition-colors">DevOps</button>
-<button className="px-6 py-2 rounded-full bg-surface-container-high text-on-surface-variant text-sm font-medium hover:bg-secondary-container transition-colors">AI/ML</button>
-<button className="px-6 py-2 rounded-full bg-surface-container-high text-on-surface-variant text-sm font-medium hover:bg-secondary-container transition-colors">Cloud</button>
-<button className="px-6 py-2 rounded-full bg-surface-container-high text-on-surface-variant text-sm font-medium hover:bg-secondary-container transition-colors">Cybersecurity</button>
+{categories.map((category) => (
+  <button
+    key={category}
+    className={`px-6 py-2 rounded-full text-sm font-medium cursor-pointer transition-colors duration-150 ${
+      activeCategory === category
+        ? 'bg-indigo-600 text-white'
+        : 'bg-transparent text-gray-600 hover:bg-gray-100'
+    }`}
+    onClick={() => setActiveCategory(category)}
+  >
+    {category}
+  </button>
+))}
 </div>
 </div>
 </section>
