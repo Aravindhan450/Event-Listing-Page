@@ -56,6 +56,12 @@ function EventCard({ event }: { event: any }) {
 }
 
 export default function Page() {
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredEvents = events.filter((event: any) =>
+    event.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <>
 {/*  TopNavBar Component  */}
@@ -90,7 +96,7 @@ export default function Page() {
 <div className="bg-surface-container-lowest rounded-xl editorial-shadow p-2 md:p-4 flex flex-col md:flex-row gap-4 items-center">
 <div className="relative w-full md:flex-1">
 <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
-<input className="w-full pl-12 pr-4 py-4 bg-surface-container-low border-none rounded-lg focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest transition-all text-on-surface" placeholder="Search frameworks, summits, or workshops..." type="text"/>
+<input className="w-full pl-12 pr-4 py-4 bg-surface-container-low border-none rounded-lg focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest transition-all text-on-surface" placeholder="Search frameworks, summits, or workshops..." type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}/>
 </div>
 <div className="flex flex-wrap justify-center gap-2 px-2">
 <button className="px-6 py-2 rounded-full bg-secondary-container text-on-secondary-container text-sm font-medium hover:bg-secondary-fixed transition-colors">Development</button>
@@ -99,20 +105,17 @@ export default function Page() {
 <button className="px-6 py-2 rounded-full bg-surface-container-high text-on-surface-variant text-sm font-medium hover:bg-secondary-container transition-colors">Cloud</button>
 <button className="px-6 py-2 rounded-full bg-surface-container-high text-on-surface-variant text-sm font-medium hover:bg-secondary-container transition-colors">Cybersecurity</button>
 </div>
-<div className="flex items-center gap-3 pl-4 border-l border-outline-variant/20">
-<span className="text-sm font-medium text-on-surface-variant">Live</span>
-<button className="w-12 h-6 bg-primary-container rounded-full relative p-1 transition-colors">
-<div className="w-4 h-4 bg-primary rounded-full absolute right-1"></div>
-</button>
-</div>
 </div>
 </section>
 {/*  Events Grid  */}
 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-  {events.map((event: any) => (
+  {filteredEvents.map((event: any) => (
     <EventCard key={event.id} event={event} />
   ))}
 </div>
+{filteredEvents.length === 0 && (
+  <p className="text-center text-gray-400 mt-12 text-base">No events found for "{searchQuery}"</p>
+)}
 </main>
 <footer className="mt-auto bg-surface-container-lowest border-t border-outline-variant/10" style={{ position: 'relative', display: 'flex', alignItems: 'center', width: '100%', padding: '40px 24px' }}>
   {/* LEFT */}
