@@ -5,6 +5,33 @@ import { useDebounce } from '../hooks/useDebounce';
 
 const categories = ['All', 'Development', 'DevOps', 'AI/ML', 'Cloud', 'Cybersecurity'];
 
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function highlightText(text: string, query: string): React.ReactNode {
+  const normalizedQuery = query.trim();
+  if (!normalizedQuery) {
+    return text;
+  }
+
+  const safeQuery = escapeRegExp(normalizedQuery);
+  const regex = new RegExp(`(${safeQuery})`, 'gi');
+  const parts = text.split(regex);
+
+  return parts.map((part, index) => {
+    if (part.toLowerCase() === normalizedQuery.toLowerCase()) {
+      return (
+        <span key={`${part}-${index}`} className="bg-yellow-200 rounded px-1">
+          {part}
+        </span>
+      );
+    }
+
+    return <React.Fragment key={`${part}-${index}`}>{part}</React.Fragment>;
+  });
+}
+
 function LikeButton() {
   const [liked, setLiked] = useState(false);
   return (
@@ -25,7 +52,7 @@ function LikeButton() {
   );
 }
 
-function EventCard({ event }: { event: any }) {
+function EventCard({ event, query }: { event: any; query: string }) {
   const categoryPillClasses =
     event.categoryClasses ||
     "text-[10px] uppercase tracking-widest font-bold text-primary px-2 py-0.5 rounded-full bg-primary/10";
@@ -57,7 +84,7 @@ function EventCard({ event }: { event: any }) {
         </div>
         <span className="text-xs text-on-surface-variant" style={{ whiteSpace: 'nowrap', fontSize: '12px' }}>{eventDate} • {eventTime}</span>
         <h3 className="text-lg font-bold text-on-surface mb-4 line-clamp-2 leading-tight">
-          {event.title}
+          {highlightText(event.title, query)}
         </h3>
         <div className="mt-auto flex items-center justify-between pt-4 border-t border-outline-variant/10">
           <button className="inline-flex text-primary text-sm font-semibold hover:underline cursor-pointer transition-all duration-200 ease-in-out hover:text-indigo-600 hover:translate-x-1">View Details</button>
@@ -70,16 +97,68 @@ function EventCard({ event }: { event: any }) {
   );
 }
 
+function EmptyState({
+  searchQuery,
+  activeCategory,
+  onClearFilters,
+}: {
+  searchQuery: string;
+  activeCategory: string;
+  onClearFilters: () => void;
+}) {
+  const trimmedQuery = searchQuery.trim();
+  const message = trimmedQuery
+    ? `No results found for "${trimmedQuery}"`
+    : 'No events found in this category';
+
+  return (
+    <div className="w-full max-w-2xl mx-auto mt-10 rounded-xl border border-outline-variant/20 bg-surface-container-lowest p-8 text-center editorial-shadow">
+      <h3 className="text-xl font-bold text-on-surface mb-3">{message}</h3>
+      <p className="text-on-surface-variant text-sm mb-4">
+        Try one of the suggestions below to find relevant events.
+      </p>
+      <ul className="text-sm text-on-surface-variant space-y-2 mb-6">
+        <li>Try a different keyword</li>
+        <li>Change the selected category</li>
+        <li>Clear filters</li>
+      </ul>
+      <button
+        type="button"
+        onClick={onClearFilters}
+        className="px-4 py-2 rounded-lg bg-primary text-on-primary font-medium hover:opacity-90 transition-opacity"
+      >
+        Clear filters
+      </button>
+      {activeCategory !== 'All' && !trimmedQuery && (
+        <p className="text-xs text-on-surface-variant mt-4">
+          Current category: {activeCategory}
+        </p>
+      )}
+    </div>
+  );
+}
+
 export default function Page() {
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
   const debouncedSearch = useDebounce(search, 300);
+  const normalizedSearchQuery = debouncedSearch.trim().toLowerCase();
 
   const filteredEvents = useMemo(() => events.filter((event: any) => {
-    const matchesSearch = event.title.toLowerCase().includes(debouncedSearch.toLowerCase());
+    const searchableText = [
+      event.title,
+      event.category,
+      event.description,
+      Array.isArray(event.tags) ? event.tags.join(' ') : event.tags,
+    ]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase();
+
+    const matchesSearch = searchableText.includes(normalizedSearchQuery);
     const matchesCategory = activeCategory === 'All' || event.category === activeCategory;
     return matchesSearch && matchesCategory;
-  }), [debouncedSearch, activeCategory]);
+  }), [normalizedSearchQuery, activeCategory]);
 
   return (
     <>
@@ -135,13 +214,21 @@ export default function Page() {
 </div>
 </section>
 {/*  Events Grid  */}
-<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 w-full">
-  {filteredEvents.map((event: any) => (
-    <EventCard key={event.id} event={event} />
-  ))}
-</div>
-{filteredEvents.length === 0 && (
-  <p className="text-center text-gray-400 mt-12 text-base">No events found for "{search}"</p>
+{filteredEvents.length === 0 ? (
+  <EmptyState
+    searchQuery={search}
+    activeCategory={activeCategory}
+    onClearFilters={() => {
+      setSearch('');
+      setActiveCategory('All');
+    }}
+  />
+) : (
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 w-full">
+    {filteredEvents.map((event: any) => (
+      <EventCard key={event.id} event={event} query={search} />
+    ))}
+  </div>
 )}
 </main>
 <footer className="mt-auto bg-surface-container-lowest border-t border-outline-variant/10 footer-grid-layout" style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', width: '100%', padding: '40px 24px', boxSizing: 'border-box' }}>
