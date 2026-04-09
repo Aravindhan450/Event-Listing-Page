@@ -1,6 +1,9 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { events } from '../data/events';
+import { useDebounce } from '../hooks/useDebounce';
+
+const categories = ['All', 'Development', 'DevOps', 'AI/ML', 'Cloud', 'Cybersecurity'];
 
 function LikeButton() {
   const [liked, setLiked] = useState(false);
@@ -68,16 +71,15 @@ function EventCard({ event }: { event: any }) {
 }
 
 export default function Page() {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
+  const debouncedSearch = useDebounce(search, 300);
 
-  const categories = ['All', 'Development', 'DevOps', 'AI/ML', 'Cloud', 'Cybersecurity'];
-
-  const filteredEvents = events.filter((event: any) => {
-    const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase());
+  const filteredEvents = useMemo(() => events.filter((event: any) => {
+    const matchesSearch = event.title.toLowerCase().includes(debouncedSearch.toLowerCase());
     const matchesCategory = activeCategory === 'All' || event.category === activeCategory;
     return matchesSearch && matchesCategory;
-  });
+  }), [debouncedSearch, activeCategory]);
 
   return (
     <>
@@ -113,7 +115,7 @@ export default function Page() {
 <div className="bg-surface-container-lowest rounded-xl editorial-shadow p-2 md:p-4 flex flex-col md:flex-row gap-4 items-center">
 <div className="relative w-full md:flex-1">
 <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
-<input className="w-full pl-12 pr-4 py-4 bg-surface-container-low border-none rounded-lg focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest transition-all text-on-surface" placeholder="Search frameworks, summits, or workshops..." type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}/>
+<input className="w-full pl-12 pr-4 py-4 bg-surface-container-low border-none rounded-lg focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest transition-all text-on-surface" placeholder="Search frameworks, summits, or workshops..." type="text" value={search} onChange={(e) => setSearch(e.target.value)}/>
 </div>
 <div className="flex flex-wrap justify-center gap-2 px-2">
 {categories.map((category) => (
@@ -139,7 +141,7 @@ export default function Page() {
   ))}
 </div>
 {filteredEvents.length === 0 && (
-  <p className="text-center text-gray-400 mt-12 text-base">No events found for "{searchQuery}"</p>
+  <p className="text-center text-gray-400 mt-12 text-base">No events found for "{search}"</p>
 )}
 </main>
 <footer className="mt-auto bg-surface-container-lowest border-t border-outline-variant/10 footer-grid-layout" style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', width: '100%', padding: '40px 24px', boxSizing: 'border-box' }}>
