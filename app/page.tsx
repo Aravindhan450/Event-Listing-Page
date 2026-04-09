@@ -47,12 +47,12 @@ function EventCard({ event }: { event: any }) {
         <LikeButton />
       </div>
       <div className="p-5 flex flex-col flex-1">
-        <div className="flex items-center justify-between mb-2">
-          <span className={categoryPillClasses}>
+        <div className="mb-2" style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+          <span className={categoryPillClasses} style={{ whiteSpace: 'nowrap', flexShrink: 0 }}>
             <span>{event.category}</span>
           </span>
-          <span className="text-xs text-on-surface-variant">{eventDate} • {eventTime}</span>
         </div>
+        <span className="text-xs text-on-surface-variant" style={{ whiteSpace: 'nowrap', fontSize: '12px' }}>{eventDate} • {eventTime}</span>
         <h3 className="text-lg font-bold text-on-surface mb-4 line-clamp-2 leading-tight">
           {event.title}
         </h3>
