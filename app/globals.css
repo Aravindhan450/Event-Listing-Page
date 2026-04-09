@@ -76,3 +76,15 @@ body {
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
+
+@media (max-width: 639px) {
+    .nav-grid-layout,
+    .footer-grid-layout {
+        grid-template-columns: 1fr 1fr !important;
+    }
+
+    .nav-center-links,
+    .footer-center-links {
+        display: none !important;
+    }
+}

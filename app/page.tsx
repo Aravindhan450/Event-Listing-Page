@@ -24,8 +24,8 @@ function LikeButton() {
 
 function EventCard({ event }: { event: any }) {
   return (
-    <div className="group w-full bg-surface-container-lowest rounded-xl editorial-shadow overflow-hidden transition-all hover:scale-[1.02] border border-outline-variant/10 flex flex-col">
-      <div className="relative h-48 overflow-hidden bg-slate-200">
+    <div className="group w-full h-full bg-surface-container-lowest rounded-xl editorial-shadow overflow-hidden transition-all hover:scale-[1.02] border border-outline-variant/10 flex flex-col">
+      <div className="relative w-full aspect-video object-cover overflow-hidden bg-slate-200">
         <img 
           alt={event.alt} 
           className="w-full h-full object-cover transition-transform group-hover:scale-105 rounded-t-xl" 
@@ -70,21 +70,21 @@ export default function Page() {
   return (
     <>
 {/*  TopNavBar Component  */}
-<nav className="bg-surface/70 backdrop-blur-md" style={{ position: 'relative', display: 'flex', alignItems: 'center', width: '100%', padding: '16px 24px', borderBottom: '1px solid #e5e7eb' }}>
-  {/* LEFT */}
-  <div style={{ flexShrink: 0 }}>
-    <span style={{ fontWeight: 700, fontSize: '18px' }} className="text-indigo-900 tracking-tight">The Kinetic Curator</span>
+<nav className="bg-surface/70 backdrop-blur-md nav-grid-layout" style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', width: '100%', padding: '16px 24px', borderBottom: '1px solid #e5e7eb', boxSizing: 'border-box' }}>
+  {/* LEFT - column 1 */}
+  <div style={{ justifySelf: 'start' }}>
+    <span style={{ fontWeight: 700, fontSize: '18px', whiteSpace: 'nowrap' }} className="text-indigo-900 tracking-tight">The Kinetic Curator</span>
   </div>
 
-  {/* CENTER — absolutely centered to full navbar width */}
-  <div style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '32px' }} className="hidden md:flex">
+  {/* CENTER - column 2, naturally centered */}
+  <div style={{ display: 'flex', gap: '32px', justifySelf: 'center' }} className="nav-center-links">
     <a className="text-indigo-600 font-semibold border-b-2 border-indigo-600 py-1 transition-all" href="#">Explore</a>
     <a className="text-slate-500 hover:text-indigo-500 py-1 transition-all" href="#">Trending</a>
     <a className="text-slate-500 hover:text-indigo-500 py-1 transition-all" href="#">Collections</a>
   </div>
 
-  {/* RIGHT */}
-  <div style={{ marginLeft: 'auto', flexShrink: 0, display: 'flex', alignItems: 'center', gap: '12px' }}>
+  {/* RIGHT - column 3 */}
+  <div style={{ justifySelf: 'end', display: 'flex', alignItems: 'center', gap: '12px' }}>
     <button className="p-2 rounded-full hover:bg-slate-100/50 transition-all active:scale-90 duration-200">
       <span className="material-symbols-outlined text-slate-600">notifications</span>
     </button>
@@ -121,7 +121,7 @@ export default function Page() {
 </div>
 </section>
 {/*  Events Grid  */}
-<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 w-full">
   {filteredEvents.map((event: any) => (
     <EventCard key={event.id} event={event} />
   ))}
@@ -130,21 +130,21 @@ export default function Page() {
   <p className="text-center text-gray-400 mt-12 text-base">No events found for "{searchQuery}"</p>
 )}
 </main>
-<footer className="mt-auto bg-surface-container-lowest border-t border-outline-variant/10" style={{ position: 'relative', display: 'flex', alignItems: 'center', width: '100%', padding: '40px 24px' }}>
-  {/* LEFT */}
-  <div style={{ flexShrink: 0 }}>
-    <span className="text-xl font-bold text-indigo-900 tracking-tight">The Kinetic Curator</span>
+<footer className="mt-auto bg-surface-container-lowest border-t border-outline-variant/10 footer-grid-layout" style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', width: '100%', padding: '40px 24px', boxSizing: 'border-box' }}>
+  {/* LEFT - column 1 */}
+  <div style={{ justifySelf: 'start' }}>
+    <span style={{ whiteSpace: 'nowrap' }} className="text-xl font-bold text-indigo-900 tracking-tight">The Kinetic Curator</span>
   </div>
 
-  {/* CENTER */}
-  <div style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '32px' }} className="hidden md:flex text-sm text-on-surface-variant">
+  {/* CENTER - column 2 */}
+  <div style={{ display: 'flex', justifySelf: 'center' }} className="footer-center-links text-sm text-on-surface-variant gap-6">
     <a className="hover:text-primary transition-colors" href="#">Privacy Policy</a>
     <a className="hover:text-primary transition-colors" href="#">Terms of Service</a>
     <a className="hover:text-primary transition-colors" href="#">Support</a>
   </div>
 
-  {/* RIGHT */}
-  <div style={{ marginLeft: 'auto', flexShrink: 0, display: 'flex', alignItems: 'center' }}>
+  {/* RIGHT - column 3 */}
+  <div style={{ justifySelf: 'end', display: 'flex', alignItems: 'center' }}>
     <span className="text-sm text-on-surface-variant">© 2024 Kinetic Media Group.</span>
   </div>
 </footer>
