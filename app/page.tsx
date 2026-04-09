@@ -23,6 +23,18 @@ function LikeButton() {
 }
 
 function EventCard({ event }: { event: any }) {
+  const categoryPillClasses =
+    event.categoryClasses ||
+    "text-[10px] uppercase tracking-widest font-bold text-primary px-2 py-0.5 rounded-full bg-primary/10";
+  const eventDate =
+    event.date ||
+    (typeof event.datetime === 'string' ? event.datetime.split('•')[0].trim() : '');
+  const eventTime =
+    event.time ||
+    (typeof event.datetime === 'string' && event.datetime.includes('•')
+      ? event.datetime.split('•')[1].trim()
+      : '');
+
   return (
     <div className="group w-full h-full bg-surface-container-lowest rounded-xl editorial-shadow overflow-hidden transition-all hover:scale-[1.02] border border-outline-variant/10 flex flex-col">
       <div className="relative w-full aspect-video object-cover overflow-hidden bg-slate-200">
@@ -36,10 +48,10 @@ function EventCard({ event }: { event: any }) {
       </div>
       <div className="p-5 flex flex-col flex-1">
         <div className="flex items-center justify-between mb-2">
-          <span className={event.categoryClasses}>
-            {event.category}
+          <span className={categoryPillClasses}>
+            <span>{event.category}</span>
           </span>
-          <span className="text-xs text-on-surface-variant">{event.datetime}</span>
+          <span className="text-xs text-on-surface-variant">{eventDate} • {eventTime}</span>
         </div>
         <h3 className="text-lg font-bold text-on-surface mb-4 line-clamp-2 leading-tight">
           {event.title}

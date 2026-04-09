@@ -133,5 +133,18 @@ export const events = [
     datetime: "Jan 28, 2025 • 11:00 AM",
     title: "Zero Trust Security in Cloud Environments",
     image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=600&h=340&fit=crop"
+  },
+  {
+    id: 16,
+    title: "Docker & Containerization Bootcamp",
+    category: "DevOps",
+    image: "https://images.unsplash.com/photo-1618401471353-b98afee0b2eb?w=600&h=340&fit=crop",
+    date: "Feb 10, 2025",
+    time: "10:00 AM",
+    likes: 0,
+    isLive: false,
+    description: "A hands-on bootcamp covering Docker fundamentals, container orchestration, multi-stage builds, and deploying containerized apps to production. Ideal for backend and DevOps engineers.",
+    streamer: "DevOps Weekly",
+    viewers: 0
   }
 ];
