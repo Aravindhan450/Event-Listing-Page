@@ -24,7 +24,7 @@ function LikeButton() {
 
 function EventCard({ event }: { event: any }) {
   return (
-    <div className="group bg-surface-container-lowest rounded-xl editorial-shadow overflow-hidden transition-all hover:scale-[1.02] border border-outline-variant/10 flex flex-col">
+    <div className="group w-full bg-surface-container-lowest rounded-xl editorial-shadow overflow-hidden transition-all hover:scale-[1.02] border border-outline-variant/10 flex flex-col">
       <div className="relative h-48 overflow-hidden bg-slate-200">
         <img 
           alt={event.alt} 
@@ -45,8 +45,8 @@ function EventCard({ event }: { event: any }) {
           {event.title}
         </h3>
         <div className="mt-auto flex items-center justify-between pt-4 border-t border-outline-variant/10">
-          <button className="text-primary text-sm font-semibold hover:underline">View Details</button>
-          <button className="p-2 rounded-lg hover:bg-surface-container-high transition-colors">
+          <button className="inline-flex text-primary text-sm font-semibold hover:underline cursor-pointer transition-all duration-200 ease-in-out hover:text-indigo-600 hover:translate-x-1">View Details</button>
+          <button className="inline-flex p-2 rounded-lg hover:bg-surface-container-high transition-colors cursor-pointer transition-all duration-200 ease-in-out hover:text-indigo-600 hover:scale-125">
             <span className="material-symbols-outlined text-on-surface-variant">share</span>
           </button>
         </div>
@@ -59,24 +59,27 @@ export default function Page() {
   return (
     <>
 {/*  TopNavBar Component  */}
-<header className="fixed top-0 w-full z-50 bg-surface/70 backdrop-blur-md shadow-sm border-b border-outline-variant/10">
-<div className="flex justify-between items-center px-6 py-4 max-w-7xl mx-auto">
-<div className="text-2xl font-bold text-indigo-900 tracking-tight">The Kinetic Curator</div>
-<nav className="hidden md:flex items-center gap-8">
-<a className="text-indigo-600 font-semibold border-b-2 border-indigo-600 py-1 transition-all" href="#">Explore</a>
-<a className="text-slate-500 hover:text-indigo-500 py-1 transition-all" href="#">Trending</a>
-<a className="text-slate-500 hover:text-indigo-500 py-1 transition-all" href="#">Collections</a>
+<nav className="bg-surface/70 backdrop-blur-md" style={{ position: 'relative', display: 'flex', alignItems: 'center', width: '100%', padding: '16px 24px', borderBottom: '1px solid #e5e7eb' }}>
+  {/* LEFT */}
+  <div style={{ flexShrink: 0 }}>
+    <span style={{ fontWeight: 700, fontSize: '18px' }} className="text-indigo-900 tracking-tight">The Kinetic Curator</span>
+  </div>
+
+  {/* CENTER — absolutely centered to full navbar width */}
+  <div style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '32px' }} className="hidden md:flex">
+    <a className="text-indigo-600 font-semibold border-b-2 border-indigo-600 py-1 transition-all" href="#">Explore</a>
+    <a className="text-slate-500 hover:text-indigo-500 py-1 transition-all" href="#">Trending</a>
+    <a className="text-slate-500 hover:text-indigo-500 py-1 transition-all" href="#">Collections</a>
+  </div>
+
+  {/* RIGHT */}
+  <div style={{ marginLeft: 'auto', flexShrink: 0, display: 'flex', alignItems: 'center', gap: '12px' }}>
+    <button className="p-2 rounded-full hover:bg-slate-100/50 transition-all active:scale-90 duration-200">
+      <span className="material-symbols-outlined text-slate-600">notifications</span>
+    </button>
+    <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#4f46e5', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>AK</div>
+  </div>
 </nav>
-<div className="flex items-center gap-4">
-<button className="p-2 rounded-full hover:bg-slate-100/50 transition-all active:scale-90 duration-200">
-<span className="material-symbols-outlined text-slate-600">notifications</span>
-</button>
-<div className="h-10 w-10 rounded-full bg-surface-container-high overflow-hidden">
-<img alt="User profile" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDq97LqPqi3f4nygZvPIkMPn1OOwXaK4o6Lz5VZ0lCIYfdIlkd6KxWw0tzS5XT_aidlu_4p_qXjYra8jyrhBvy83gjtyQZdiRrveV0vLQsrbdnAdoMkiZeAJ--Ur0fVRYFUVMrj-EtCaNnfKvqyAzr-AhYJua1XtR8aqYM_Rb50cgVXANnmQzQPa3fU-KvlkfMAvuadTwsqxcNJ04zE2f9ELzklDQtNUgrm1fJKHiEyu6wYbur-KF7ocMoev_dtWsEarz8Hk1QAhPaB"/>
-</div>
-</div>
-</div>
-</header>
 <main className="pt-24 pb-16 px-6 max-w-7xl mx-auto w-full">
 {/*  Hero Search Section  */}
 <section className="mb-12">
@@ -105,22 +108,29 @@ export default function Page() {
 </div>
 </section>
 {/*  Events Grid  */}
-<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
   {events.map((event: any) => (
     <EventCard key={event.id} event={event} />
   ))}
 </div>
 </main>
-<footer className="mt-auto border-t border-outline-variant/10 py-10 px-6 bg-surface-container-lowest">
-<div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-<div className="text-xl font-bold text-indigo-900 tracking-tight">The Kinetic Curator</div>
-<div className="flex gap-8 text-sm text-on-surface-variant">
-<a className="hover:text-primary transition-colors" href="#">Privacy Policy</a>
-<a className="hover:text-primary transition-colors" href="#">Terms of Service</a>
-<a className="hover:text-primary transition-colors" href="#">Support</a>
-</div>
-<div className="text-sm text-on-surface-variant">© 2024 Kinetic Media Group.</div>
-</div>
+<footer className="mt-auto bg-surface-container-lowest border-t border-outline-variant/10" style={{ position: 'relative', display: 'flex', alignItems: 'center', width: '100%', padding: '40px 24px' }}>
+  {/* LEFT */}
+  <div style={{ flexShrink: 0 }}>
+    <span className="text-xl font-bold text-indigo-900 tracking-tight">The Kinetic Curator</span>
+  </div>
+
+  {/* CENTER */}
+  <div style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '32px' }} className="hidden md:flex text-sm text-on-surface-variant">
+    <a className="hover:text-primary transition-colors" href="#">Privacy Policy</a>
+    <a className="hover:text-primary transition-colors" href="#">Terms of Service</a>
+    <a className="hover:text-primary transition-colors" href="#">Support</a>
+  </div>
+
+  {/* RIGHT */}
+  <div style={{ marginLeft: 'auto', flexShrink: 0, display: 'flex', alignItems: 'center' }}>
+    <span className="text-sm text-on-surface-variant">© 2024 Kinetic Media Group.</span>
+  </div>
 </footer>
     </>
   );
