@@ -1,5 +1,5 @@
 "use client";
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { events } from '../data/events';
 import { useDebounce } from '../hooks/useDebounce';
 
@@ -139,10 +139,16 @@ function EmptyState({
 }
 
 export default function Page() {
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
   const debouncedSearch = useDebounce(search, 300);
   const normalizedSearchQuery = debouncedSearch.trim().toLowerCase();
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 2200);
+    return () => clearTimeout(timer);
+  }, []);
 
   const filteredEvents = useMemo(() => events.filter((event: any) => {
     const searchableText = [
@@ -160,8 +166,48 @@ export default function Page() {
     return matchesSearch && matchesCategory;
   }), [normalizedSearchQuery, activeCategory]);
 
+  if (loading) {
+    return (
+      <div style={{
+        position: 'fixed', inset: 0,
+        backgroundColor: '#0f0f1a',
+        display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center',
+        zIndex: 9999
+      }}>
+        <h1 style={{ color: '#ffffff', fontSize: '28px', fontWeight: 700, marginBottom: '12px', letterSpacing: '-0.5px' }}>
+          The Kinetic Curator
+        </h1>
+        <p style={{ color: '#6b7280', fontSize: '14px', marginBottom: '40px' }}>
+          Curated engineering experiences
+        </p>
+        <div style={{
+          width: '180px', height: '3px',
+          backgroundColor: '#1f1f2e',
+          borderRadius: '99px', overflow: 'hidden'
+        }}>
+          <div style={{
+            height: '100%',
+            width: '40%',
+            backgroundColor: '#4f46e5',
+            borderRadius: '99px',
+            animation: 'slide 1.4s ease-in-out infinite'
+          }} />
+        </div>
+        <style>{`
+          @keyframes slide {
+            0% { transform: translateX(-100%) scaleX(0.5); }
+            50% { transform: translateX(150%) scaleX(1.2); }
+            100% { transform: translateX(400%) scaleX(0.5); }
+          }
+        `}</style>
+      </div>
+    );
+  }
+
   return (
     <>
+<div style={{ animation: 'fadeIn 0.6s ease-in-out' }}>
 {/*  TopNavBar Component  */}
 <nav className="bg-surface/70 backdrop-blur-md nav-grid-layout" style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', width: '100%', padding: '16px 24px', borderBottom: '1px solid #e5e7eb', boxSizing: 'border-box' }}>
   {/* LEFT - column 1 */}
@@ -249,6 +295,13 @@ export default function Page() {
     <span className="text-sm text-on-surface-variant">© 2024 Kinetic Media Group.</span>
   </div>
 </footer>
+</div>
+<style>{`
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+`}</style>
     </>
   );
 }
