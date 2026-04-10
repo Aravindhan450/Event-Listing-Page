@@ -2,8 +2,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { events } from '../data/events';
 import { useDebounce } from '../hooks/useDebounce';
-
-const categories = ['All', 'Development', 'DevOps', 'AI/ML', 'Cloud', 'Cybersecurity'];
+import WhyHostSection from './components/WhyHostSection';
+import Footer from './components/Footer';
 
 function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -107,17 +107,13 @@ function EventCard({ event, query }: { event: any; query: string }) {
 
 function EmptyState({
   searchQuery,
-  activeCategory,
-  onClearFilters,
+  onClearSearch,
 }: {
   searchQuery: string;
-  activeCategory: string;
-  onClearFilters: () => void;
+  onClearSearch: () => void;
 }) {
   const trimmedQuery = searchQuery.trim();
-  const message = trimmedQuery
-    ? `No results found for "${trimmedQuery}"`
-    : 'No events found in this category';
+  const message = trimmedQuery ? `No results found for "${trimmedQuery}"` : 'No events found';
 
   return (
     <div className="w-full max-w-2xl mx-auto mt-10 rounded-xl border border-outline-variant/20 bg-surface-container-lowest p-8 text-center editorial-shadow">
@@ -127,21 +123,16 @@ function EmptyState({
       </p>
       <ul className="text-sm text-on-surface-variant space-y-2 mb-6">
         <li>Try a different keyword</li>
-        <li>Change the selected category</li>
-        <li>Clear filters</li>
+        <li>Check spelling</li>
+        <li>Clear search</li>
       </ul>
       <button
         type="button"
-        onClick={onClearFilters}
+        onClick={onClearSearch}
         className="px-4 py-2 rounded-lg bg-primary text-on-primary font-medium hover:opacity-90 transition-opacity"
       >
-        Clear filters
+        Clear search
       </button>
-      {activeCategory !== 'All' && !trimmedQuery && (
-        <p className="text-xs text-on-surface-variant mt-4">
-          Current category: {activeCategory}
-        </p>
-      )}
     </div>
   );
 }
@@ -149,30 +140,19 @@ function EmptyState({
 export default function Page() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [activeCategory, setActiveCategory] = useState('All');
   const debouncedSearch = useDebounce(search, 300);
-  const normalizedSearchQuery = debouncedSearch.trim().toLowerCase();
 
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 2200);
     return () => clearTimeout(timer);
   }, []);
 
-  const filteredEvents = useMemo(() => events.filter((event: any) => {
-    const searchableText = [
-      event.title,
-      event.category,
-      event.description,
-      Array.isArray(event.tags) ? event.tags.join(' ') : event.tags,
-    ]
-      .filter(Boolean)
-      .join(' ')
-      .toLowerCase();
-
-    const matchesSearch = searchableText.includes(normalizedSearchQuery);
-    const matchesCategory = activeCategory === 'All' || event.category === activeCategory;
-    return matchesSearch && matchesCategory;
-  }), [normalizedSearchQuery, activeCategory]);
+  const finalEvents = useMemo(() => {
+    const normalizedSearchQuery = debouncedSearch.trim().toLowerCase();
+    return events.filter((event: any) =>
+      (event.title || '').toLowerCase().includes(normalizedSearchQuery)
+    );
+  }, [debouncedSearch]);
 
   if (loading) {
     return (
@@ -223,15 +203,8 @@ export default function Page() {
     <span style={{ fontWeight: 700, fontSize: '18px', whiteSpace: 'nowrap' }} className="text-indigo-900 tracking-tight">The Kinetic Curator</span>
   </div>
 
-  {/* CENTER - column 2, naturally centered */}
-  <div style={{ display: 'flex', gap: '32px', justifySelf: 'center' }} className="nav-center-links">
-    <a className="text-indigo-600 font-semibold border-b-2 border-indigo-600 py-1 transition-all" href="#">Explore</a>
-    <a className="text-slate-500 hover:text-indigo-500 py-1 transition-all" href="#">Trending</a>
-    <a className="text-slate-500 hover:text-indigo-500 py-1 transition-all" href="#">Collections</a>
-  </div>
-
   {/* RIGHT - column 3 */}
-  <div style={{ justifySelf: 'end', display: 'flex', alignItems: 'center', gap: '12px' }}>
+  <div style={{ gridColumn: '3', justifySelf: 'end', display: 'flex', alignItems: 'center', gap: '12px' }}>
     <button className="p-2 rounded-full hover:bg-slate-100/50 transition-all active:scale-90 duration-200">
       <span className="material-symbols-outlined text-slate-600">notifications</span>
     </button>
@@ -250,59 +223,29 @@ export default function Page() {
 <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
 <input className="w-full pl-12 pr-4 py-4 bg-surface-container-low border-none rounded-lg focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest transition-all text-on-surface" placeholder="Search frameworks, summits, or workshops..." type="text" value={search} onChange={(e) => setSearch(e.target.value)}/>
 </div>
-<div className="flex flex-wrap justify-center gap-2 px-2">
-{categories.map((category) => (
-  <button
-    key={category}
-    className={`px-6 py-2 rounded-full text-sm font-medium cursor-pointer transition-colors duration-150 ${
-      activeCategory === category
-        ? 'bg-indigo-600 text-white'
-        : 'bg-transparent text-gray-600 hover:bg-gray-100'
-    }`}
-    onClick={() => setActiveCategory(category)}
-  >
-    {category}
-  </button>
-))}
-</div>
 </div>
 </section>
 {/*  Events Grid  */}
-{filteredEvents.length === 0 ? (
+{finalEvents.length === 0 ? (
   <EmptyState
-    searchQuery={search}
-    activeCategory={activeCategory}
-    onClearFilters={() => {
+    searchQuery={debouncedSearch}
+    onClearSearch={() => {
       setSearch('');
-      setActiveCategory('All');
     }}
   />
 ) : (
-  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 w-full">
-    {filteredEvents.map((event: any) => (
-      <EventCard key={event.id} event={event} query={search} />
-    ))}
-  </div>
+  <>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 w-full">
+      {finalEvents.map((event: any) => (
+        <EventCard key={event.id} event={event} query={debouncedSearch} />
+      ))}
+    </div>
+  </>
 )}
+
+<WhyHostSection />
 </main>
-<footer className="mt-auto bg-surface-container-lowest border-t border-outline-variant/10 footer-grid-layout" style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', width: '100%', padding: '40px 24px', boxSizing: 'border-box' }}>
-  {/* LEFT - column 1 */}
-  <div style={{ justifySelf: 'start' }}>
-    <span style={{ whiteSpace: 'nowrap' }} className="text-xl font-bold text-indigo-900 tracking-tight">The Kinetic Curator</span>
-  </div>
-
-  {/* CENTER - column 2 */}
-  <div style={{ display: 'flex', justifySelf: 'center' }} className="footer-center-links text-sm text-on-surface-variant gap-6">
-    <a className="hover:text-primary transition-colors" href="#">Privacy Policy</a>
-    <a className="hover:text-primary transition-colors" href="#">Terms of Service</a>
-    <a className="hover:text-primary transition-colors" href="#">Support</a>
-  </div>
-
-  {/* RIGHT - column 3 */}
-  <div style={{ justifySelf: 'end', display: 'flex', alignItems: 'center' }}>
-    <span className="text-sm text-on-surface-variant">© 2024 Kinetic Media Group.</span>
-  </div>
-</footer>
+<Footer />
 </div>
 <style>{`
   @keyframes fadeIn {
