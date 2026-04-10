@@ -24,7 +24,7 @@ export const events = [
     category: "Development",
     datetime: "May 02, 2026 • 10:00 AM",
     title: "Rust Dev Days: Memory Safety at Scale",
-    image: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=600&h=340&fit=crop"
+    image: "https://res.cloudinary.com/dvsklwfcf/image/upload/v1775828996/Rust_development_workspace_flat_lay_d9nrmf.png"
   },
   {
     id: 4,
@@ -60,7 +60,7 @@ export const events = [
     category: "DevOps",
     datetime: "May 28, 2026 • 08:00 AM",
     title: "Kubernetes Advanced Masterclass",
-    image: "https://images.unsplash.com/photo-1667372393119-3d4c48d07fc9?w=600&h=340&fit=crop"
+    image: "https://res.cloudinary.com/dvsklwfcf/image/upload/v1775828549/Kubernetes_robot_in_a_futuristic_city_dzsdyg.png"
   },
   {
     id: 8,
@@ -78,7 +78,7 @@ export const events = [
     category: "Development",
     datetime: "Jun 12, 2026 • 09:00 AM",
     title: "Native Mobile Dev Expo: iOS & Android",
-    image: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=600&h=340&fit=crop"
+    image: "https://images.unsplash.com/photo-1526498460520-4c246339dccb?w=600&h=340&fit=crop"
   },
   {
     id: 10,
@@ -96,7 +96,7 @@ export const events = [
     category: "Development",
     datetime: "Jun 25, 2026 • 01:00 PM",
     title: "Decentralized Future: Blockchain Summit",
-    image: "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=600&h=340&fit=crop"
+    image: "https://res.cloudinary.com/dvsklwfcf/image/upload/v1775827905/aG90by5qcGVn_poi3wh.jpg"
   },
   {
     id: 12,
@@ -105,7 +105,7 @@ export const events = [
     category: "Development",
     datetime: "Jul 03, 2026 • 02:00 PM",
     title: "High-Performance Backend Systems",
-    image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&h=340&fit=crop"
+    image: "https://res.cloudinary.com/dvsklwfcf/image/upload/v1775828945/RGs9_fvkzgn.jpg"
   },
   {
     id: 13,
@@ -114,7 +114,7 @@ export const events = [
     category: "Development",
     datetime: "Jul 10, 2026 • 10:00 AM",
     title: "Interface Design for Complex Software",
-    image: "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=600&h=340&fit=crop"
+    image: "https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?w=600&h=340&fit=crop"
   },
   {
     id: 14,
@@ -132,19 +132,15 @@ export const events = [
     category: "Cybersecurity",
     datetime: "Jul 25, 2026 • 11:00 AM",
     title: "Zero Trust Security in Cloud Environments",
-    image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=600&h=340&fit=crop"
+    image: "https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=600&h=340&fit=crop"
   },
   {
     id: 16,
-    title: "Docker & Containerization Bootcamp",
+    alt: "Docker Bootcamp",
+    categoryClasses: "text-[10px] uppercase tracking-widest font-bold text-tertiary px-2 py-0.5 rounded-full bg-tertiary/10",
     category: "DevOps",
-    image: "https://images.unsplash.com/photo-1618401471353-b98afee0b2eb?w=600&h=340&fit=crop",
-    date: "Aug 02, 2026",
-    time: "10:00 AM",
-    likes: 0,
-    isLive: false,
-    description: "A hands-on bootcamp covering Docker fundamentals, container orchestration, multi-stage builds, and deploying containerized apps to production. Ideal for backend and DevOps engineers.",
-    streamer: "DevOps Weekly",
-    viewers: 0
+    datetime: "Aug 02, 2026 • 10:00 AM",
+    title: "Docker & Containerization Bootcamp",
+    image: "https://res.cloudinary.com/dvsklwfcf/image/upload/v1775828348/Docker_whale_in_a_tech_setting_zb6az8.png"
   }
 ];

@@ -67,13 +67,21 @@ function EventCard({ event, query }: { event: any; query: string }) {
 
   return (
     <div className="group w-full h-full bg-surface-container-lowest rounded-xl editorial-shadow overflow-hidden transition-all hover:scale-[1.02] border border-outline-variant/10 flex flex-col">
-      <div className="relative w-full aspect-video object-cover overflow-hidden bg-slate-200">
+      <div className="relative w-full aspect-video overflow-hidden" style={{ position: 'relative' }}>
         <img 
           alt={event.alt} 
-          className="w-full h-full object-cover transition-transform group-hover:scale-105 rounded-t-xl" 
+          className="transition-transform group-hover:scale-105 rounded-t-xl" 
+          style={{ objectFit: 'cover', width: '100%', height: '100%' }}
           src={event.image}
           loading="lazy"
         />
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'linear-gradient(to top, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.1) 40%, rgba(0,0,0,0) 100%)',
+          borderRadius: 'inherit',
+          pointerEvents: 'none'
+        }} />
         <LikeButton />
       </div>
       <div className="p-5 flex flex-col flex-1">
