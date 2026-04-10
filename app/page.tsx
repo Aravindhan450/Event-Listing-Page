@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { events } from '../data/events';
 import { useDebounce } from '../hooks/useDebounce';
 import WhyHostSection from './components/WhyHostSection';
@@ -53,6 +54,7 @@ function LikeButton() {
 }
 
 function EventCard({ event, query }: { event: any; query: string }) {
+  const router = useRouter();
   const categoryPillClasses =
     event.categoryClasses ||
     "text-[10px] uppercase tracking-widest font-bold text-primary px-2 py-0.5 rounded-full bg-primary/10";
@@ -66,7 +68,10 @@ function EventCard({ event, query }: { event: any; query: string }) {
       : '');
 
   return (
-    <div className="group w-full h-full bg-surface-container-lowest rounded-xl editorial-shadow overflow-hidden transition-all hover:scale-[1.02] border border-outline-variant/10 flex flex-col">
+    <div
+      className="group w-full h-full bg-surface-container-lowest rounded-xl editorial-shadow overflow-hidden transition-all hover:scale-[1.02] border border-outline-variant/10 flex flex-col cursor-pointer"
+      onClick={() => router.push(`/events/${event.id}`)}
+    >
       <div className="relative w-full aspect-video overflow-hidden" style={{ position: 'relative' }}>
         <img 
           alt={event.alt} 
@@ -140,6 +145,9 @@ function EmptyState({
 export default function Page() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [dateFilter, setDateFilter] = useState('All Dates');
+  const [eventTypeFilter, setEventTypeFilter] = useState('All Types');
+  const [sortOption, setSortOption] = useState('Soonest');
   const debouncedSearch = useDebounce(search, 300);
 
   useEffect(() => {
@@ -223,6 +231,40 @@ export default function Page() {
 <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
 <input className="w-full pl-12 pr-4 py-4 bg-surface-container-low border-none rounded-lg focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest transition-all text-on-surface" placeholder="Search frameworks, summits, or workshops..." type="text" value={search} onChange={(e) => setSearch(e.target.value)}/>
 </div>
+</div>
+<div className="flex gap-4 mt-6 flex-wrap">
+  <select
+    value={dateFilter}
+    onChange={(e) => setDateFilter(e.target.value)}
+    className="border rounded-lg px-3 py-2 bg-white"
+  >
+    <option>All Dates</option>
+    <option>Today</option>
+    <option>This Week</option>
+    <option>This Month</option>
+  </select>
+
+  <select
+    value={eventTypeFilter}
+    onChange={(e) => setEventTypeFilter(e.target.value)}
+    className="border rounded-lg px-3 py-2 bg-white"
+  >
+    <option>All Types</option>
+    <option>Workshop</option>
+    <option>Summit</option>
+    <option>Bootcamp</option>
+    <option>Masterclass</option>
+    <option>Expo</option>
+  </select>
+
+  <select
+    value={sortOption}
+    onChange={(e) => setSortOption(e.target.value)}
+    className="border rounded-lg px-3 py-2 bg-white"
+  >
+    <option>Soonest</option>
+    <option>Newest</option>
+  </select>
 </div>
 </section>
 {/*  Events Grid  */}

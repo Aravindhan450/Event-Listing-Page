@@ -2,7 +2,6 @@ import React from 'react';
 
 const ecosystemLinks = ['Developer API', 'Community Discord', 'Code of Conduct'];
 const companyLinks = ['About Us', 'Careers', 'Privacy Policy'];
-const socialPlaceholders = ['X', 'in', 'GH'];
 const bottomLinks = ['Twitter', 'LinkedIn', 'GitHub'];
 
 export default function Footer() {
@@ -15,16 +14,6 @@ export default function Footer() {
             <p className="text-slate-600 leading-relaxed mb-6 max-w-sm">
               Curating the world&#39;s premier technical knowledge exchange platforms.
             </p>
-            <div className="flex items-center gap-3">
-              {socialPlaceholders.map((label) => (
-                <span
-                  key={label}
-                  className="h-9 min-w-9 px-3 rounded-full bg-slate-200 text-slate-700 text-xs font-semibold inline-flex items-center justify-center"
-                >
-                  {label}
-                </span>
-              ))}
-            </div>
           </div>
 
           <div>
