@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://vickybytes.vercel.app/sitemap.xml

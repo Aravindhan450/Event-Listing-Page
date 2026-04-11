@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import ShareModal from './ShareModal';
 
 type Speaker = {
   name: string;
@@ -8,9 +9,7 @@ type Speaker = {
   avatarInitials: string;
 };
 
-type VideoPlayerProps = {
-  videoUrl?: string;
-  thumbnail?: string;
+type EventInfoProps = {
   category: string;
   date: string;
   time: string;
@@ -21,9 +20,7 @@ type VideoPlayerProps = {
   tags: string[];
 };
 
-export default function VideoPlayer({
-  videoUrl,
-  thumbnail,
+export default function EventInfo({
   category,
   date,
   time,
@@ -32,58 +29,35 @@ export default function VideoPlayer({
   viewerCount,
   description,
   tags,
-}: VideoPlayerProps) {
-  const [isPlaying, setIsPlaying] = useState(false);
+}: EventInfoProps) {
   const [liked, setLiked] = useState(false);
   const [heartAnimating, setHeartAnimating] = useState(false);
-  const likeCount = 128;
+  const [likeCount, setLikeCount] = useState(128);
+  const [subscribed, setSubscribed] = useState(false);
+  const [subscribePop, setSubscribePop] = useState(false);
+  const [showUnsubConfirm, setShowUnsubConfirm] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   const handleLikeToggle = () => {
+    setLikeCount((count) => (liked ? count - 1 : count + 1));
     setLiked((prev) => !prev);
     setHeartAnimating(true);
     window.setTimeout(() => setHeartAnimating(false), 150);
   };
 
+  const handleSubscribeToggle = () => {
+    if (!subscribed) {
+      setSubscribed(true);
+      setSubscribePop(true);
+      window.setTimeout(() => setSubscribePop(false), 300);
+      return;
+    }
+
+    setShowUnsubConfirm(true);
+  };
+
   return (
-    <div>
-      <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-inverse-surface">
-        {isPlaying ? (
-          <iframe
-            src={`${videoUrl}?autoplay=1&rel=0&modestbranding=1`}
-            className="w-full h-full"
-            frameBorder="0"
-            allowFullScreen
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          />
-        ) : (
-          <div
-            style={{ position: 'relative', width: '100%', height: '100%', cursor: 'pointer', borderRadius: 'inherit' }}
-            onClick={() => setIsPlaying(true)}
-          >
-            <img src={thumbnail} width="100%" height="100%" style={{ objectFit: 'cover' }} alt={title} />
-            <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <div style={{ width: '72px', height: '72px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="#4f46e5" aria-hidden="true">
-                  <polygon points="5,3 19,12 5,21"/>
-                </svg>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div className="absolute left-3 top-3">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-red-600 px-2 py-1 text-xs font-bold text-white">
-            <span
-              className="h-2 w-2 rounded-full bg-red-300"
-              style={{ animation: 'statusPulse 1.5s ease-in-out infinite' }}
-              aria-hidden="true"
-            />
-            LIVE
-          </span>
-        </div>
-
-      </div>
-
+    <>
       <div className="mt-6" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px' }}>
         <h1 style={{ fontSize: '20px', fontWeight: 700, color: '#0f172a', margin: 0 }}>{title}</h1>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -114,6 +88,7 @@ export default function VideoPlayer({
           </button>
           <button
             type="button"
+            onClick={() => setShowShareModal(true)}
             style={{
               border: '1px solid #e5e7eb',
               borderRadius: '999px',
@@ -132,6 +107,86 @@ export default function VideoPlayer({
           </button>
         </div>
       </div>
+
+      <ShareModal show={showShareModal} onClose={() => setShowShareModal(false)} />
+
+      {showUnsubConfirm && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            zIndex: 2000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+          onClick={() => setShowUnsubConfirm(false)}
+        >
+          <div
+            className="share-modal"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              backgroundColor: '#ffffff',
+              borderRadius: '16px',
+              padding: '28px 24px',
+              width: '360px',
+              maxWidth: '90vw',
+              boxShadow: '0 20px 60px rgba(0,0,0,0.15)'
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <div style={{ width: '56px', height: '56px', borderRadius: '50%', backgroundColor: '#4f46e5', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: 700 }}>
+                {speaker.avatarInitials}
+              </div>
+            </div>
+            <div style={{ fontSize: '13px', color: '#6b7280', textAlign: 'center', marginTop: '12px' }}>
+              Unsubscribe from
+            </div>
+            <div style={{ fontSize: '16px', fontWeight: 700, color: '#0f172a', textAlign: 'center' }}>
+              {speaker.name}
+            </div>
+
+            <div style={{ display: 'flex', gap: '12px', marginTop: '24px', width: '100%' }}>
+              <button
+                type="button"
+                onClick={() => setShowUnsubConfirm(false)}
+                style={{
+                  flex: 1,
+                  backgroundColor: '#f1f5f9',
+                  color: '#374151',
+                  borderRadius: '99px',
+                  padding: '10px',
+                  border: 'none',
+                  fontWeight: 600,
+                  cursor: 'pointer'
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setSubscribed(false);
+                  setShowUnsubConfirm(false);
+                }}
+                style={{
+                  flex: 1,
+                  backgroundColor: '#ef4444',
+                  color: '#ffffff',
+                  borderRadius: '99px',
+                  padding: '10px',
+                  border: 'none',
+                  fontWeight: 600,
+                  cursor: 'pointer'
+                }}
+              >
+                Unsubscribe
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div style={{ marginTop: '10px', display: 'flex', alignItems: 'center', gap: '12px', fontSize: '13px', color: '#6b7280', flexWrap: 'wrap' }}>
         <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
@@ -156,17 +211,20 @@ export default function VideoPlayer({
         </div>
         <button
           type="button"
+          onClick={handleSubscribeToggle}
+          className={subscribePop ? 'subscribe-pop' : ''}
           style={{
-            backgroundColor: '#0f172a',
-            color: '#ffffff',
+            backgroundColor: subscribed ? '#f1f5f9' : '#0f172a',
+            color: subscribed ? '#0f172a' : '#ffffff',
             borderRadius: '99px',
             padding: '8px 20px',
-            border: 'none',
+            border: subscribed ? '1px solid #e5e7eb' : 'none',
             cursor: 'pointer',
-            fontWeight: 600
+            fontWeight: 600,
+            transition: 'background-color 0.2s ease, color 0.2s ease, border 0.2s ease'
           }}
         >
-          Subscribe
+          {subscribed ? 'Subscribed ✓' : 'Subscribe'}
         </button>
       </div>
 
@@ -206,17 +264,24 @@ export default function VideoPlayer({
         </div>
       </section>
 
-      <style jsx>{`
-        @keyframes statusPulse {
-          0%,
-          100% {
-            opacity: 1;
-          }
-          50% {
-            opacity: 0.4;
-          }
+      <style>{`
+        @keyframes subscribePop {
+          0% { transform: scale(1); }
+          40% { transform: scale(1.08); }
+          100% { transform: scale(1); }
         }
+
+        @keyframes modalIn {
+          from { opacity: 0; transform: scale(0.92); }
+          to { opacity: 1; transform: scale(1); }
+        }
+
+        .subscribe-pop {
+          animation: subscribePop 0.25s ease-out;
+        }
+
+        .share-modal { animation: modalIn 0.2s ease-out both; }
       `}</style>
-    </div>
+    </>
   );
 }
