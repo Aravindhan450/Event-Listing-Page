@@ -50,12 +50,12 @@ export default function Navbar({
   );
 
   return (
-    <nav className="bg-surface/70 backdrop-blur-md nav-grid-layout" style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', width: '100%', padding: '16px 24px', position: 'sticky', top: 0, zIndex: 1000, backdropFilter: 'blur(12px)', backgroundColor: 'rgba(255, 255, 255, 0.85)', borderBottom: '1px solid #e5e7eb', boxSizing: 'border-box' }}>
+    <nav className="bg-surface/70 backdrop-blur-md nav-grid-layout animate-fade-in anim-slide-down" style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', width: '100%', padding: '16px 24px', position: 'sticky', top: 0, zIndex: 1000, backdropFilter: 'blur(12px)', backgroundColor: 'rgba(255, 255, 255, 0.85)', borderBottom: '1px solid #e5e7eb', boxSizing: 'border-box' }}>
       <div style={{ justifySelf: 'start' }}>
         <span style={{ fontWeight: 700, fontSize: '18px', whiteSpace: 'nowrap' }} className="text-indigo-900 tracking-tight">VickyBytes</span>
       </div>
 
-      <div style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: '480px' }}>
+      <div className="animate-fade-up delay-2" style={{ gridColumn: '2', justifySelf: 'center', width: '100%', maxWidth: '640px', minWidth: '520px' }}>
         <div style={{
           display: 'flex', alignItems: 'center',
           backgroundColor: '#ffffff', borderRadius: '99px',

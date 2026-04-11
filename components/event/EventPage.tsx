@@ -61,9 +61,26 @@ export default function EventPage({ id }: EventPageProps) {
     <div className="event-page min-h-screen bg-background text-on-background">
       <Navbar />
 
-      <div style={{ maxWidth: '1600px', margin: '24px auto', padding: '0 32px', width: '100%' }}>
-        <main className="event-main-row" style={{ display: 'flex', gap: '24px', alignItems: 'flex-start', width: '100%' }}>
-          <section style={{ flex: 1, minWidth: 0 }}>
+      <div
+        className="event-page-layout"
+        style={{
+          display: 'flex',
+          gap: '24px',
+          padding: '20px 24px',
+          width: '100%',
+          maxWidth: '1600px',
+          margin: '0 auto',
+          alignItems: 'flex-start',
+          boxSizing: 'border-box'
+        }}
+      >
+        <section
+          style={{
+            flex: 1,
+            minWidth: 0
+          }}
+        >
+          <div className="animate-scale-in delay-1 anim-scale-in d1" style={{ width: '100%', marginBottom: '12px' }}>
             <div style={{ width: '100%' }}>
               <VideoPlayer
                 videoUrl={event.videoUrl}
@@ -79,18 +96,57 @@ export default function EventPage({ id }: EventPageProps) {
                 tags={event.tags}
               />
             </div>
-          </section>
+          </div>
+        </section>
 
-          <div style={{ width: '380px', flexShrink: 0 }}>
+        <div
+          className="event-chat-column animate-fade-left delay-2 anim-fade-left d2"
+          style={{
+            width: '320px',
+            minWidth: '320px',
+            flexShrink: 0,
+            position: 'sticky',
+            top: '72px',
+            height: 'calc(100vh - 88px)',
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+            borderRadius: '12px',
+            border: '1px solid rgba(15, 23, 42, 0.24)'
+          }}
+        >
+          <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
             <LiveChat viewerCount={event.viewerCount} />
           </div>
-        </main>
+        </div>
       </div>
 
       <style>{`
-        @media (max-width: 1024px) {
-          .event-main-row {
+        @media (max-width: 1280px) and (min-width: 1024px) {
+          .event-chat-column {
+            width: 280px !important;
+            min-width: 280px !important;
+          }
+        }
+
+        @media (max-width: 1023px) {
+          .event-page-layout {
             flex-direction: column;
+          }
+
+          .event-chat-column {
+            width: 100% !important;
+            min-width: 100% !important;
+            position: relative !important;
+            top: auto !important;
+            height: 480px !important;
+            max-height: 480px !important;
+          }
+        }
+
+        @media (max-width: 768px) {
+          .event-page-layout {
+            padding: 12px 16px !important;
           }
         }
       `}</style>

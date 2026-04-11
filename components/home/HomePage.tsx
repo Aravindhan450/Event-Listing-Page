@@ -337,21 +337,21 @@ export default function Page() {
 {/*  Hero Search Section  */}
 <section className="mb-12">
 <div style={{ width: '100%', padding: '16px 48px 0', display: 'flex', flexDirection: 'column', gap: '24px' }}>
-  <span className="animate-fade-up" style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.12em', color: '#6b7280', textTransform: 'uppercase', animationDelay: '0s' }}>
+  <span className="animate-fade-up delay-1 anim-fade-up d1" style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.12em', color: '#6b7280', textTransform: 'uppercase' }}>
     LIVE EVENTS PLATFORM
   </span>
 
-  <h1 className="animate-fade-up" style={{ fontSize: 'clamp(36px, 5vw, 64px)', fontWeight: 900, color: '#0f172a', lineHeight: 1.1, letterSpacing: '-2px', maxWidth: '700px', margin: 0, animationDelay: '0.1s' }}>
+  <h1 className="animate-fade-up delay-2 anim-fade-up d2" style={{ fontSize: 'clamp(36px, 5vw, 64px)', fontWeight: 900, color: '#0f172a', lineHeight: 1.1, letterSpacing: '-2px', maxWidth: '700px', margin: 0 }}>
     The platform where
     <br />
     developers level up.
   </h1>
 
-  <p className="animate-fade-up" style={{ fontSize: '16px', color: '#6b7280', maxWidth: '480px', margin: 0, animationDelay: '0.2s' }}>
+  <p className="animate-fade-up delay-3 anim-fade-up d3" style={{ fontSize: '16px', color: '#6b7280', maxWidth: '480px', margin: 0 }}>
     Live summits, workshops, and bootcamps from senior engineers — free to attend.
   </p>
 
-  <div className="animate-fade-up" style={{ display: 'grid', gridTemplateColumns: '1.2fr 2fr 1.5fr 0.8fr', gap: '8px', width: '100%', height: '360px', marginTop: '8px', borderRadius: '16px', overflow: 'hidden', animationDelay: '0.4s' }}>
+  <div className="animate-scale-in delay-4 anim-scale-in d3" style={{ display: 'grid', gridTemplateColumns: '1.2fr 2fr 1.5fr 0.8fr', gap: '8px', width: '100%', height: '360px', marginTop: '8px', borderRadius: '16px', overflow: 'hidden' }}>
     <div className="mosaic-wrap">
       <img src="https://images.unsplash.com/photo-1591115765373-5207764f72e7?w=400&h=400&fit=crop" className="mosaic-img" style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scale(1)', transition: 'transform 0.4s ease' }} alt="Tech conference audience" loading="lazy" />
     </div>
@@ -366,7 +366,7 @@ export default function Page() {
     </div>
   </div>
 
-  <div className="stats-row animate-fade-up" style={{ display: 'flex', justifyContent: 'center', gap: '16px', flexWrap: 'wrap', width: '100%', maxWidth: '760px', margin: '32px auto', animationDelay: '0.5s' }}>
+  <div className="stats-row animate-fade-up delay-5 anim-fade-up d4" style={{ display: 'flex', justifyContent: 'center', gap: '16px', flexWrap: 'wrap', width: '100%', maxWidth: '760px', margin: '32px auto' }}>
     {[
       ['16 Events', 'Across 8 categories'],
       ['3 Live Today', 'Join now free'],
@@ -403,78 +403,26 @@ export default function Page() {
   </div>
 </div>
 
-<div style={{
-  display: 'flex', alignItems: 'center',
-  justifyContent: 'space-between',
-  width: '100%', padding: '32px 48px 0',
-  borderTop: '1px solid #e5e7eb'
-}}>
-
-  <div>
-    <h2 style={{ fontSize: '22px', fontWeight: 800, color: '#0f172a', margin: 0, letterSpacing: '-0.5px' }}>
-      Browse Events
-    </h2>
-    <p style={{ fontSize: '13px', color: '#9ca3af', margin: '4px 0 0' }}>
-      {filteredEvents.length} events found
-    </p>
-  </div>
-
-  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', backgroundColor: '#f1f5f9', borderRadius: '10px', padding: '4px' }}>
-    <button
-      onClick={() => setViewMode('grid')}
-      style={{
-        padding: '7px 14px', borderRadius: '8px', border: 'none', cursor: 'pointer',
-        fontSize: '13px', fontWeight: 600,
-        backgroundColor: viewMode === 'grid' ? '#ffffff' : 'transparent',
-        color: viewMode === 'grid' ? '#0f172a' : '#9ca3af',
-        boxShadow: viewMode === 'grid' ? '0 1px 4px rgba(0,0,0,0.08)' : 'none',
-        transition: 'all 0.2s ease',
-        display: 'flex', alignItems: 'center', gap: '6px'
-      }}>
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
-        <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
-      </svg>
-      Grid
-    </button>
-    <button
-      onClick={() => setViewMode('list')}
-      style={{
-        padding: '7px 14px', borderRadius: '8px', border: 'none', cursor: 'pointer',
-        fontSize: '13px', fontWeight: 600,
-        backgroundColor: viewMode === 'list' ? '#ffffff' : 'transparent',
-        color: viewMode === 'list' ? '#0f172a' : '#9ca3af',
-        boxShadow: viewMode === 'list' ? '0 1px 4px rgba(0,0,0,0.08)' : 'none',
-        transition: 'all 0.2s ease',
-        display: 'flex', alignItems: 'center', gap: '6px'
-      }}>
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
-      </svg>
-      List
-    </button>
-  </div>
-
-</div>
-
-<div style={{ padding: '32px 48px 0' }}>
+<div className="mt-8" style={{ padding: '0 48px' }}>
 <div style={{ textAlign: 'center' }}>
-  <h2 className="text-2xl md:text-3xl font-semibold text-gray-900">Explore Events</h2>
-  <p className="text-gray-600 mt-2">Find technical events across cloud, AI, DevOps, and emerging technologies.</p>
+  <h2 className="text-xl font-semibold text-gray-900">Explore Events</h2>
+  <p className="text-gray-600 mt-2 max-w-xl mx-auto font-normal" style={{ lineHeight: 1.75 }}>Find technical events across cloud, AI, DevOps, and emerging technologies.</p>
 </div>
-<div className="animate-fade-up mt-6" style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center', flexWrap: 'wrap', animationDelay: '0.2s' }}>
-  {['All', 'Development', 'DevOps', 'AI/ML', 'Cloud', 'Cybersecurity', 'Mobile', 'Web3', 'Backend', 'Design'].map(cat => (
-    <button key={cat} onClick={() => setActiveCategory(cat)} style={{
-      padding: '7px 18px', borderRadius: '99px', fontSize: '13px', fontWeight: 500,
-      cursor: 'pointer', border: '1.5px solid', transition: 'all 0.2s ease',
-      backgroundColor: activeCategory === cat ? '#4f46e5' : 'transparent',
-      borderColor: activeCategory === cat ? '#4f46e5' : '#d1d5db',
-      color: activeCategory === cat ? '#ffffff' : '#374151'
-    }} className="interactive-btn">{cat}</button>
-  ))}
-</div>
-<div style={{ textAlign: 'center', marginTop: '16px' }}>
-  <button onClick={() => setShowFilters(!showFilters)} className="interactive-btn animate-fade-up" style={{
+<div className="animate-fade-up delay-3 mt-5 anim-fade-up d2" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+  <div className="flex flex-wrap justify-center gap-3" style={{ flex: 1 }}>
+    {['All', 'Development', 'DevOps', 'AI/ML', 'Cloud', 'Cybersecurity', 'Mobile', 'Web3', 'Backend', 'Design'].map(cat => (
+      <button key={cat} onClick={() => setActiveCategory(cat)} style={{
+        padding: '7px 18px', borderRadius: '99px', fontSize: '13px', fontWeight: 500,
+        cursor: 'pointer', border: '1.5px solid', transition: 'all 0.2s ease',
+        backgroundColor: activeCategory === cat ? '#4f46e5' : 'transparent',
+        borderColor: activeCategory === cat ? '#4f46e5' : '#d1d5db',
+        color: activeCategory === cat ? '#ffffff' : '#374151'
+      }} className="interactive-btn">{cat}</button>
+    ))}
+  </div>
+
+  <div className="mt-0 text-center" style={{ marginLeft: 'auto' }}>
+  <button onClick={() => setShowFilters(!showFilters)} className="interactive-btn animate-fade-up delay-4 anim-fade-up d3" style={{
     backgroundColor: showFilters ? '#4f46e5' : '#ffffff',
     border: '1.5px solid #4f46e5',
     color: showFilters ? '#ffffff' : '#4f46e5',
@@ -487,8 +435,7 @@ export default function Page() {
     alignItems: 'center',
     gap: '6px',
     boxShadow: '0 4px 14px rgba(79, 70, 229, 0.15)',
-    transition: 'all 0.2s ease',
-    animationDelay: '0.3s'
+    transition: 'all 0.2s ease'
   }}>
     <svg width="16" height="16" fill="none" stroke={showFilters ? '#ffffff' : '#4f46e5'} strokeWidth="2" viewBox="0 0 24 24">
       <line x1="4" y1="6" x2="20" y2="6"/>
@@ -497,6 +444,7 @@ export default function Page() {
     </svg>
     {showFilters ? 'Hide Filters' : 'Advanced Filters'}
   </button>
+  </div>
 </div>
 
 {showFilters && (
@@ -595,6 +543,47 @@ export default function Page() {
 )}
 </div>
 </section>
+
+<div className="flex justify-between items-center" style={{ marginTop: '8px' }}>
+  <p className="text-sm text-gray-500">{filteredEvents.length} events found</p>
+
+  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', backgroundColor: '#f1f5f9', borderRadius: '10px', padding: '4px' }}>
+    <button
+      onClick={() => setViewMode('grid')}
+      style={{
+        padding: '7px 14px', borderRadius: '8px', border: 'none', cursor: 'pointer',
+        fontSize: '13px', fontWeight: 600,
+        backgroundColor: viewMode === 'grid' ? '#ffffff' : 'transparent',
+        color: viewMode === 'grid' ? '#0f172a' : '#9ca3af',
+        boxShadow: viewMode === 'grid' ? '0 1px 4px rgba(0,0,0,0.08)' : 'none',
+        transition: 'all 0.2s ease',
+        display: 'flex', alignItems: 'center', gap: '6px'
+      }}>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+        <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+      </svg>
+      Grid
+    </button>
+    <button
+      onClick={() => setViewMode('list')}
+      style={{
+        padding: '7px 14px', borderRadius: '8px', border: 'none', cursor: 'pointer',
+        fontSize: '13px', fontWeight: 600,
+        backgroundColor: viewMode === 'list' ? '#ffffff' : 'transparent',
+        color: viewMode === 'list' ? '#0f172a' : '#9ca3af',
+        boxShadow: viewMode === 'list' ? '0 1px 4px rgba(0,0,0,0.08)' : 'none',
+        transition: 'all 0.2s ease',
+        display: 'flex', alignItems: 'center', gap: '6px'
+      }}>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+      List
+    </button>
+  </div>
+</div>
+
 {/*  Events Grid  */}
 {finalEvents.length === 0 ? (
   <EmptyState

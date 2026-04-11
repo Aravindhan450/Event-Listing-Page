@@ -40,40 +40,45 @@ export default function VideoPlayer({
 
   return (
     <div>
-      <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-inverse-surface">
-        {isPlaying ? (
-          <iframe
-            src={`${videoUrl}?autoplay=1&rel=0&modestbranding=1`}
-            className="w-full h-full"
-            frameBorder="0"
-            allowFullScreen
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          />
-        ) : (
-          <div
-            style={{ position: 'relative', width: '100%', height: '100%', cursor: 'pointer', borderRadius: 'inherit' }}
-            onClick={() => setIsPlaying(true)}
-          >
-            <img src={thumbnail} width="100%" height="100%" style={{ objectFit: 'cover' }} alt={title} />
-            <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <div style={{ width: '72px', height: '72px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="#4f46e5" aria-hidden="true">
-                  <polygon points="5,3 19,12 5,21"/>
-                </svg>
+      <div
+        className="bg-inverse-surface"
+        style={{ width: '100%', borderRadius: '10px', overflow: 'hidden' }}
+      >
+        <div style={{ position: 'relative', width: '100%', paddingTop: '56.25%' }}>
+          {isPlaying ? (
+            <iframe
+              src={`${videoUrl}?autoplay=1&rel=0&modestbranding=1`}
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
+              frameBorder="0"
+              allowFullScreen
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            />
+          ) : (
+            <div
+              style={{ position: 'absolute', inset: 0, cursor: 'pointer', borderRadius: 'inherit' }}
+              onClick={() => setIsPlaying(true)}
+            >
+              <img src={thumbnail} width="100%" height="100%" style={{ objectFit: 'cover' }} alt={title} />
+              <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ width: '72px', height: '72px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="#4f46e5" aria-hidden="true">
+                    <polygon points="5,3 19,12 5,21"/>
+                  </svg>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        <div className="absolute left-3 top-3">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-red-600 px-2 py-1 text-xs font-bold text-white">
-            <span
-              className="h-2 w-2 rounded-full bg-red-300"
-              style={{ animation: 'statusPulse 1.5s ease-in-out infinite' }}
-              aria-hidden="true"
-            />
-            LIVE
-          </span>
+          <div className="absolute left-3 top-3">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-red-600 px-2 py-1 text-xs font-bold text-white">
+              <span
+                className="h-2 w-2 rounded-full bg-red-300"
+                style={{ animation: 'statusPulse 1.5s ease-in-out infinite' }}
+                aria-hidden="true"
+              />
+              LIVE
+            </span>
+          </div>
         </div>
       </div>
 

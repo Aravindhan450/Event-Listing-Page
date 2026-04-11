@@ -61,54 +61,8 @@ export default function EventInfo({
 
   return (
     <>
-      <div className="mt-6" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px' }}>
-        <h1 style={{ fontSize: '20px', fontWeight: 700, color: '#0f172a', margin: 0 }}>{title}</h1>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <button
-            type="button"
-            aria-label="Like event"
-            onClick={handleLikeToggle}
-            style={{
-              border: '1px solid #e5e7eb',
-              borderRadius: '999px',
-              padding: '8px 14px',
-              backgroundColor: '#ffffff',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              cursor: 'pointer'
-            }}
-          >
-            <span
-              className={`material-symbols-outlined inline-block transition-transform duration-150 ${
-                heartAnimating ? 'scale-[1.2]' : 'scale-100'
-              } ${liked ? 'text-[#ef4444]' : 'text-on-surface-variant'}`}
-              style={{ fontVariationSettings: liked ? "'FILL' 1" : "'FILL' 0", fontSize: '18px' }}
-            >
-              favorite
-            </span>
-            <span style={{ fontSize: '13px', color: '#374151', fontWeight: 600 }}>{likeCount}</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setShowShareModal(true)}
-            style={{
-              border: '1px solid #e5e7eb',
-              borderRadius: '999px',
-              padding: '8px 14px',
-              backgroundColor: '#ffffff',
-              fontSize: '13px',
-              fontWeight: 600,
-              color: '#374151',
-              cursor: 'pointer'
-            }}
-          >
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-              Share
-              <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>share</span>
-            </span>
-          </button>
-        </div>
+      <div className="animate-fade-up delay-2 anim-fade-up d2" style={{ marginTop: '12px', marginBottom: '8px' }}>
+        <h1 style={{ fontSize: '20px', fontWeight: 700, color: '#0f172a', margin: 0, lineHeight: 1.3 }}>{title}</h1>
       </div>
 
       <ShareModal show={showShareModal} onClose={() => setShowShareModal(false)} />
@@ -191,113 +145,141 @@ export default function EventInfo({
         </div>
       )}
 
-      <div style={{ marginTop: '10px', display: 'flex', alignItems: 'center', gap: '12px', fontSize: '13px', color: '#6b7280', flexWrap: 'wrap' }}>
-        <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
-          {category}
-        </span>
-        <span>{time ? `${date} • ${time}` : date}</span>
-        <span style={{ color: '#9ca3af' }}>•</span>
-        <span>{(viewerCount / 1000).toFixed(1)}K watching</span>
-      </div>
-
-      <div style={{ height: '1px', backgroundColor: '#e5e7eb', width: '100%', margin: '16px 0' }} />
-
-      <div className="mt-4" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-sm font-semibold text-on-primary">
-            {speaker.avatarInitials}
-          </div>
-          <div>
-            <p style={{ fontWeight: 600, color: '#0f172a', margin: 0 }}>{speaker.name}</p>
-            <p style={{ fontSize: '13px', color: '#6b7280', margin: '2px 0 0' }}>{speaker.role}</p>
-          </div>
-        </div>
-        <button
-          type="button"
-          onClick={handleSubscribeToggle}
-          className={subscribePop ? 'subscribe-pop' : ''}
-          style={{
-            backgroundColor: subscribed ? '#f1f5f9' : '#0f172a',
-            color: subscribed ? '#0f172a' : '#ffffff',
-            borderRadius: '99px',
-            padding: '8px 20px',
-            border: subscribed ? '1px solid #e5e7eb' : 'none',
-            cursor: 'pointer',
-            fontWeight: 600,
-            transition: 'background-color 0.2s ease, color 0.2s ease, border 0.2s ease'
-          }}
-        >
-          {subscribed ? 'Subscribed ✓' : 'Subscribe'}
-        </button>
-      </div>
-
-      <div style={{ height: '1px', backgroundColor: '#e5e7eb', width: '100%', margin: '16px 0' }} />
-
-      <section
+      <div
+        className="event-streamer-row animate-fade-up delay-3 anim-fade-up d3"
         style={{
-          backgroundColor: '#ffffff',
-          borderRadius: '16px',
-          border: '1px solid #e5e7eb',
-          padding: '24px',
-          marginTop: '16px'
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          padding: '12px 0',
+          borderTop: '1px solid #e5e7eb',
+          borderBottom: '1px solid #e5e7eb',
+          margin: '8px 0 0'
         }}
       >
-        <div
-          className="event-key-details-grid"
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(4, 1fr)',
-            gap: '16px',
-            marginBottom: '20px',
-            paddingBottom: '20px',
-            borderBottom: '1px solid #f1f5f9'
-          }}
-        >
-          {[
-            { label: 'Category', value: category },
-            { label: 'Date', value: date },
-            { label: 'Time', value: time },
-            { label: 'Type', value: eventType },
-          ].map((item) => (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div>
             <div
-              key={item.label}
               style={{
-                backgroundColor: '#f8fafc',
-                borderRadius: '12px',
-                padding: '12px 16px',
+                width: '40px',
+                height: '40px',
+                borderRadius: '50%',
+                backgroundColor: '#4f46e5',
+                color: '#ffffff',
+                fontSize: '14px',
+                fontWeight: 700,
                 display: 'flex',
-                flexDirection: 'column',
-                gap: '4px'
+                alignItems: 'center',
+                justifyContent: 'center'
               }}
             >
-              <span
-                style={{
-                  fontSize: '11px',
-                  fontWeight: 700,
-                  color: '#9ca3af',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.08em'
-                }}
-              >
-                {item.label}
-              </span>
-              <span style={{ fontSize: '14px', fontWeight: 600, color: '#0f172a' }}>{item.value}</span>
+              {speaker.avatarInitials}
             </div>
-          ))}
+          </div>
+          <span style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a' }}>{speaker.name}</span>
+          <span style={{ fontSize: '12px', color: '#6b7280' }}>12.4K subscribers</span>
+          <button
+            type="button"
+            onClick={handleSubscribeToggle}
+            className={subscribePop ? 'subscribe-pop' : ''}
+            style={{
+              backgroundColor: subscribed ? '#f1f5f9' : '#0f172a',
+              color: subscribed ? '#0f172a' : '#ffffff',
+              borderRadius: '99px',
+              padding: '6px 16px',
+              border: subscribed ? '1px solid #e5e7eb' : 'none',
+              cursor: 'pointer',
+              fontWeight: 600,
+              fontSize: '13px',
+              transition: 'background-color 0.2s ease, color 0.2s ease, border 0.2s ease'
+            }}
+          >
+            {subscribed ? 'Subscribed ✓' : 'Subscribe'}
+          </button>
         </div>
 
-        <p
-          style={{
-            fontSize: '11px',
-            fontWeight: 700,
-            color: '#9ca3af',
-            textTransform: 'uppercase',
-            letterSpacing: '0.1em',
-            marginBottom: '12px'
-          }}
-        >
-          ABOUT THIS EVENT
-        </p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: 'auto' }}>
+          <button
+            type="button"
+            aria-label="Like event"
+            onClick={handleLikeToggle}
+            style={{
+              border: '1px solid #e5e7eb',
+              borderRadius: '999px',
+              padding: '6px 12px',
+              backgroundColor: '#ffffff',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              cursor: 'pointer'
+            }}
+          >
+            <span
+              className={`material-symbols-outlined inline-block transition-transform duration-150 ${
+                heartAnimating ? 'scale-[1.2]' : 'scale-100'
+              } ${liked ? 'text-[#ef4444]' : 'text-on-surface-variant'}`}
+              style={{ fontVariationSettings: liked ? "'FILL' 1" : "'FILL' 0", fontSize: '16px' }}
+            >
+              favorite
+            </span>
+            <span style={{ fontSize: '13px', color: '#374151', fontWeight: 600 }}>{likeCount}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowShareModal(true)}
+            style={{
+              border: '1px solid #e5e7eb',
+              borderRadius: '999px',
+              padding: '6px 12px',
+              backgroundColor: '#ffffff',
+              fontSize: '13px',
+              fontWeight: 600,
+              color: '#374151',
+              cursor: 'pointer'
+            }}
+          >
+            Share
+          </button>
+          <button
+            type="button"
+            aria-label="More options"
+            style={{
+              border: '1px solid #e5e7eb',
+              borderRadius: '999px',
+              padding: '6px 10px',
+              backgroundColor: '#ffffff',
+              cursor: 'pointer',
+              color: '#374151'
+            }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>more_horiz</span>
+          </button>
+        </div>
+      </div>
+
+      <section
+        className="animate-fade-up delay-4 anim-fade-up d4"
+        style={{
+          backgroundColor: '#f9f9f9',
+          borderRadius: '12px',
+          border: '1px solid #e5e7eb',
+          padding: '16px',
+          marginTop: '12px'
+        }}
+      >
+        <div className="anim-fade-up d3" style={{ fontSize: '13px', color: '#374151', marginBottom: '10px', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '6px' }}>
+          <span style={{ fontWeight: 600 }}>{viewerCount.toLocaleString()} watching now</span>
+          <span style={{ color: '#9ca3af' }}>•</span>
+          <span>Started {time ? `${date} ${time}` : date}</span>
+          <span style={{ color: '#9ca3af' }}>•</span>
+          <span>{category}</span>
+          <span style={{ color: '#9ca3af' }}>•</span>
+          <span>{eventType}</span>
+        </div>
+
+        <div style={{ fontSize: '13px', color: '#6b7280', marginBottom: '10px' }}>
+          8 Events • 4.8★ Rating • 2.4K Followers
+        </div>
 
         <p
           style={{
@@ -334,14 +316,28 @@ export default function EventInfo({
           {isExpanded ? 'Show less' : '...more'}
         </button>
 
-        <div style={{ marginTop: '16px' }}>
-          {tags.map((tag) => (
-            <span
-              key={tag}
-              className="inline-block bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs mr-2"
+        <div style={{ marginTop: '12px', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+          {[
+            { label: 'Slides', href: '#slides' },
+            { label: 'Resource Repo', href: '#resources' },
+            { label: 'Speaker Profile', href: '#speaker' },
+          ].map((link) => (
+            <a
+              key={link.label}
+              href={link.href}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                fontSize: '12px',
+                color: '#4f46e5',
+                textDecoration: 'none',
+                fontWeight: 600
+              }}
             >
-              {tag}
-            </span>
+              <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>link</span>
+              {link.label}
+            </a>
           ))}
         </div>
       </section>
@@ -365,8 +361,8 @@ export default function EventInfo({
         .share-modal { animation: modalIn 0.2s ease-out both; }
 
         @media (max-width: 639px) {
-          .event-key-details-grid {
-            grid-template-columns: repeat(2, 1fr) !important;
+          .event-streamer-row {
+            flex-wrap: wrap;
           }
         }
       `}</style>

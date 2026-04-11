@@ -6,7 +6,7 @@ const bottomLinks = ['Twitter', 'LinkedIn', 'GitHub'];
 
 export default function Footer() {
   return (
-    <footer className="mt-20 border-t border-slate-200/80 bg-slate-50/60">
+    <footer className="mt-20 border-t border-slate-200/80 bg-slate-50/60 animate-fade-up anim-fade-up">
       <div className="max-w-7xl mx-auto px-6 py-16">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
           <div>

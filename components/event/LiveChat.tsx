@@ -9,6 +9,7 @@ type Message = {
   name: string;
   text: string;
   time: string;
+  isHost?: boolean;
 };
 
 type LiveChatProps = {
@@ -33,6 +34,7 @@ const INITIAL_MESSAGES: Message[] = [
     color: 'text-blue-600 bg-blue-100',
     text: 'The bit about multi-region scheduling is exactly what I needed. Anyone using Istio for this?',
     time: '09:02',
+    isHost: true,
   },
   {
     id: 2,
@@ -116,6 +118,9 @@ export default function LiveChat({ viewerCount }: LiveChatProps) {
   const [intervalDelay, setIntervalDelay] = useState(getRandomDelayMs());
   const [isPaused, setIsPaused] = useState(false);
   const [hasNewMessages, setHasNewMessages] = useState(false);
+  const [slowMode, setSlowMode] = useState(false);
+  const [cooldown, setCooldown] = useState(false);
+  const [newMessagesStartIndex, setNewMessagesStartIndex] = useState<number | null>(null);
   const messagesListRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -182,6 +187,12 @@ export default function LiveChat({ viewerCount }: LiveChatProps) {
   }, [isPaused]);
 
   useEffect(() => {
+    if (isPaused) {
+      setNewMessagesStartIndex(messages.length);
+    }
+  }, [isPaused, messages.length]);
+
+  useEffect(() => {
     const handleMouseDown = (event: MouseEvent) => {
       const target = event.target as HTMLElement | null;
       if (target?.closest('.emoji-picker-panel') || target?.closest('.emoji-picker-toggle')) {
@@ -196,7 +207,7 @@ export default function LiveChat({ viewerCount }: LiveChatProps) {
 
   const sendMessage = () => {
     const trimmed = draft.trim();
-    if (!trimmed) {
+    if (!trimmed || cooldown) {
       return;
     }
 
@@ -213,6 +224,11 @@ export default function LiveChat({ viewerCount }: LiveChatProps) {
     ]);
     setNextId((id) => id + 1);
     setDraft('');
+
+    if (slowMode) {
+      setCooldown(true);
+      window.setTimeout(() => setCooldown(false), 3000);
+    }
   };
 
   const addReaction = (messageId: number, emoji: string) => {
@@ -237,111 +253,213 @@ export default function LiveChat({ viewerCount }: LiveChatProps) {
   };
 
   return (
-    <aside className="flex flex-col h-full max-h-[520px] overflow-hidden rounded-xl border border-outline-variant/30 bg-surface-container-lowest">
-      <div className="shrink-0 flex items-center justify-between border-b border-outline-variant/30 px-4 py-3">
-        <div className="inline-flex items-center gap-2 text-sm font-semibold text-on-surface">
-          <span>LIVE CHAT</span>
+    <aside
+      style={{
+        backgroundColor: '#f8fafc',
+        borderRadius: '16px',
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%'
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '14px 16px',
+          borderBottom: '2px solid #e5e7eb',
+          backgroundColor: '#ffffff',
+          flexShrink: 0
+        }}
+      >
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
           <span
-            className="h-2 w-2 rounded-full bg-green-500"
-            style={{ animation: 'statusPulse 1.5s ease-in-out infinite' }}
+            style={{
+              width: '8px',
+              height: '8px',
+              borderRadius: '50%',
+              backgroundColor: '#ef4444',
+              animation: 'pulse 1.5s ease-in-out infinite'
+            }}
             aria-hidden="true"
           />
+          <span style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', color: '#0f172a', textTransform: 'uppercase' }}>
+            LIVE CHAT
+          </span>
         </div>
-        <span className="text-xs font-semibold text-on-surface-variant">{viewerCount} VIEWERS</span>
+
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 600, color: '#6b7280' }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M16 11c1.66 0 2.99-1.57 2.99-3.5S17.66 4 16 4s-3 1.57-3 3.5S14.34 11 16 11Zm-8 0c1.66 0 2.99-1.57 2.99-3.5S9.66 4 8 4 5 5.57 5 7.5 6.34 11 8 11Zm0 2c-2.33 0-7 1.17-7 3.5V20h14v-3.5C15 14.17 10.33 13 8 13Zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.96 1.97 3.45V20h6v-3.5c0-2.33-4.67-3.5-7-3.5Z" fill="currentColor"/>
+            </svg>
+            {viewerCount} viewers
+          </span>
+
+          {slowMode && (
+            <span
+              style={{
+                backgroundColor: '#fef9c3',
+                color: '#854d0e',
+                fontSize: '10px',
+                fontWeight: 700,
+                padding: '2px 8px',
+                borderRadius: '99px'
+              }}
+            >
+              🐢 Slow Mode
+            </span>
+          )}
+
+          <button
+            type="button"
+            aria-label="Toggle slow mode"
+            onClick={() => setSlowMode((prev) => !prev)}
+            style={{ background: 'none', border: 'none', fontSize: '16px', cursor: 'pointer', padding: '2px 4px' }}
+          >
+            ⚙️
+          </button>
+        </div>
+      </div>
+
+      <div
+        style={{
+          backgroundColor: '#eff6ff',
+          borderBottom: '1px solid #dbeafe',
+          padding: '8px 12px',
+          fontSize: '12px',
+          color: '#1d4ed8',
+          flexShrink: 0
+        }}
+      >
+        📌 Keep chat constructive and on-topic.
       </div>
 
       <div
         ref={messagesListRef}
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
-        className="relative flex-1 overflow-y-auto px-3 py-2 space-y-4 [scrollbar-gutter:stable]"
+        className="relative space-y-2 [scrollbar-gutter:stable]"
+        style={{ backgroundColor: '#f8fafc', flex: 1, overflowY: 'auto', minHeight: 0, padding: '8px 0' }}
       >
         {messages.map((message, index) => {
           const [textClass, bgClass] = message.color.split(' ');
           const messageReactions = reactions[message.id];
+          const showNewMessagesDivider = (isPaused || hasNewMessages)
+            && newMessagesStartIndex !== null
+            && newMessagesStartIndex < messages.length
+            && index === newMessagesStartIndex;
+
           return (
-            <div
-              key={message.id}
-              onMouseEnter={() => setHoveredMessage(message.id)}
-              onMouseLeave={() => setHoveredMessage(null)}
-              className={`flex items-start gap-3 ${
-                index === messages.length - 1 && messages.length > INITIAL_MESSAGES.length
-                  ? 'chat-message-new'
-                  : ''
-              }`}
-              style={{ position: 'relative' }}
-            >
-              {hoveredMessage === message.id && (
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: '-32px',
-                    left: 0,
-                    backgroundColor: '#ffffff',
-                    borderRadius: '99px',
-                    boxShadow: '0 2px 12px rgba(0,0,0,0.1)',
-                    border: '1px solid #e5e7eb',
-                    padding: '4px 8px',
-                    display: 'flex',
-                    gap: '4px',
-                    zIndex: 10
-                  }}
-                >
-                  {['👍', '🔥', '❤️', '😄'].map((emoji) => (
-                    <button
-                      key={emoji}
-                      type="button"
-                      onClick={() => addReaction(message.id, emoji)}
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        fontSize: '16px',
-                        cursor: 'pointer',
-                        padding: '0'
-                      }}
-                    >
-                      {emoji}
-                    </button>
-                  ))}
+            <React.Fragment key={message.id}>
+              {showNewMessagesDivider && (
+                <div style={{ display: 'flex', alignItems: 'center', width: '100%', padding: '0 8px' }}>
+                  <div style={{ flex: 1, height: '1px', backgroundColor: '#e5e7eb' }} />
+                  <span style={{ fontSize: '11px', color: '#9ca3af', fontWeight: 600, padding: '0 8px' }}>New messages</span>
+                  <div style={{ flex: 1, height: '1px', backgroundColor: '#e5e7eb' }} />
                 </div>
               )}
 
-              <div className={`h-8 w-8 rounded-full ${bgClass} ${textClass} text-xs font-semibold flex items-center justify-center`}>
-                {message.initials}
-              </div>
-              <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className={`text-sm font-semibold ${textClass}`}>{message.name}</span>
-                  <span className="text-xs text-on-surface-variant/70">{message.time}</span>
-                </div>
-                <p className="text-sm text-on-surface-variant leading-relaxed">{message.text}</p>
-                {messageReactions && Object.keys(messageReactions).length > 0 && (
-                  <div style={{ marginTop: '6px', display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                    {Object.entries(messageReactions).map(([emoji, count]) => (
+              <div
+                onMouseEnter={() => setHoveredMessage(message.id)}
+                onMouseLeave={() => setHoveredMessage(null)}
+                className={`chat-message-row flex items-start gap-3 ${
+                  index === messages.length - 1 && messages.length > INITIAL_MESSAGES.length
+                    ? 'chat-message-new'
+                    : ''
+                } ${message.isHost ? 'chat-message-host' : ''}`}
+                style={{ position: 'relative', padding: '6px 12px', borderRadius: '8px' }}
+              >
+                {hoveredMessage === message.id && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: '-32px',
+                      left: 0,
+                      backgroundColor: '#ffffff',
+                      borderRadius: '99px',
+                      boxShadow: '0 2px 12px rgba(0,0,0,0.1)',
+                      border: '1px solid #e5e7eb',
+                      padding: '4px 8px',
+                      display: 'flex',
+                      gap: '4px',
+                      zIndex: 10
+                    }}
+                  >
+                    {['👍', '🔥', '❤️', '😄'].map((emoji) => (
                       <button
                         key={emoji}
                         type="button"
-                        onClick={() => removeReaction(message.id, emoji)}
+                        onClick={() => addReaction(message.id, emoji)}
                         style={{
-                          backgroundColor: '#f1f5f9',
-                          borderRadius: '99px',
-                          padding: '2px 8px',
-                          fontSize: '11px',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '4px',
+                          background: 'none',
                           border: 'none',
-                          cursor: 'pointer'
+                          fontSize: '16px',
+                          cursor: 'pointer',
+                          padding: '0'
                         }}
                       >
-                        <span>{emoji}</span>
-                        <span>{count}</span>
+                        {emoji}
                       </button>
                     ))}
                   </div>
                 )}
+
+                <div className={`h-8 w-8 rounded-full ${bgClass} ${textClass} text-xs font-semibold flex items-center justify-center`}>
+                  {message.initials}
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className={textClass} style={{ fontSize: '13px', fontWeight: 700 }}>{message.name}</span>
+                    {message.isHost && (
+                      <span
+                        style={{
+                          backgroundColor: '#4f46e5',
+                          color: '#ffffff',
+                          fontSize: '9px',
+                          fontWeight: 700,
+                          padding: '1px 6px',
+                          borderRadius: '4px'
+                        }}
+                      >
+                        HOST
+                      </span>
+                    )}
+                    <span className="message-time" style={{ fontSize: '11px', color: '#9ca3af', opacity: 0 }}>
+                      {message.time}
+                    </span>
+                  </div>
+                  <p style={{ fontSize: '13px', color: '#374151', lineHeight: 1.5 }}>{message.text}</p>
+                  {messageReactions && Object.keys(messageReactions).length > 0 && (
+                    <div style={{ marginTop: '6px', display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                      {Object.entries(messageReactions).map(([emoji, count]) => (
+                        <button
+                          key={emoji}
+                          type="button"
+                          onClick={() => removeReaction(message.id, emoji)}
+                          style={{
+                            backgroundColor: '#f1f5f9',
+                            borderRadius: '99px',
+                            padding: '2px 8px',
+                            fontSize: '11px',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            border: 'none',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          <span>{emoji}</span>
+                          <span>{count}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
+            </React.Fragment>
           );
         })}
         <div ref={messagesEndRef} />
@@ -357,10 +475,12 @@ export default function LiveChat({ viewerCount }: LiveChatProps) {
               setIsPaused(false);
             }}
             style={{
-              position: 'absolute',
-              bottom: '70px',
+              position: 'sticky',
+              bottom: '8px',
               left: '50%',
               transform: 'translateX(-50%)',
+              display: 'table',
+              margin: '0 auto',
               backgroundColor: '#4f46e5',
               color: '#ffffff',
               borderRadius: '99px',
@@ -376,7 +496,7 @@ export default function LiveChat({ viewerCount }: LiveChatProps) {
         )}
       </div>
 
-      <div className="shrink-0 border-t border-outline-variant/30 p-3 bg-white">
+      <div style={{ padding: '10px 12px', borderTop: '2px solid #e5e7eb', backgroundColor: '#ffffff', flexShrink: 0 }}>
         <div className="flex items-center gap-2" style={{ position: 'relative' }}>
           {showEmojiPicker && (
             <div
@@ -438,7 +558,21 @@ export default function LiveChat({ viewerCount }: LiveChatProps) {
               }
             }}
             placeholder="Say something..."
-            className="w-full rounded-lg border border-outline-variant/40 bg-surface-container-low px-3 py-2 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary"
+            style={{
+              width: '100%',
+              backgroundColor: '#f1f5f9',
+              border: '1px solid #e2e8f0',
+              borderRadius: '99px',
+              padding: '8px 14px',
+              fontSize: '13px',
+              outline: 'none'
+            }}
+            onFocus={(e) => {
+              e.currentTarget.style.border = '1px solid #4f46e5';
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.border = '1px solid #e2e8f0';
+            }}
           />
           <button
             type="button"
@@ -458,7 +592,18 @@ export default function LiveChat({ viewerCount }: LiveChatProps) {
           <button
             type="button"
             onClick={sendMessage}
-            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary transition-colors hover:opacity-90"
+            disabled={cooldown || !draft.trim()}
+            style={{
+              backgroundColor: '#4f46e5',
+              color: '#ffffff',
+              borderRadius: '99px',
+              padding: '8px 18px',
+              fontSize: '13px',
+              fontWeight: 600,
+              border: 'none',
+              cursor: cooldown || !draft.trim() ? 'not-allowed' : 'pointer',
+              opacity: cooldown || !draft.trim() ? 0.5 : 1
+            }}
           >
             Send
           </button>
@@ -478,7 +623,7 @@ export default function LiveChat({ viewerCount }: LiveChatProps) {
       </div>
 
       <style jsx>{`
-        @keyframes statusPulse {
+        @keyframes pulse {
           0%,
           100% {
             opacity: 1;
@@ -495,6 +640,23 @@ export default function LiveChat({ viewerCount }: LiveChatProps) {
 
         .chat-message-new {
           animation: messageSlideIn 0.25s ease-out both;
+        }
+
+        .chat-message-row {
+          transition: background 0.15s ease;
+        }
+
+        .chat-message-row:hover {
+          background-color: #f8fafc;
+        }
+
+        .chat-message-row:hover .message-time {
+          opacity: 1;
+        }
+
+        .chat-message-host {
+          border-left: 3px solid #4f46e5;
+          background-color: #f5f3ff;
         }
       `}</style>
     </aside>
