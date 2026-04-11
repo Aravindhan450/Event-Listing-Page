@@ -425,43 +425,44 @@ export default function Page() {
   <h2 className="text-xl font-semibold text-gray-900">Explore Events</h2>
   <p className="text-gray-600 mt-2 max-w-xl mx-auto font-normal" style={{ lineHeight: 1.75 }}>Find technical events across cloud, AI, DevOps, and emerging technologies.</p>
 </div>
-<div className="animate-fade-up delay-3 mt-5 anim-fade-up d2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
-  <div className="category-scroll flex sm:flex-wrap justify-start sm:justify-center gap-3 overflow-x-auto sm:overflow-visible whitespace-nowrap sm:whitespace-normal pb-1 sm:pb-0" style={{ flex: 1 }}>
-    {['All', 'Development', 'DevOps', 'AI/ML', 'Cloud', 'Cybersecurity', 'Mobile', 'Web3', 'Backend', 'Design'].map(cat => (
-      <button key={cat} onClick={() => setActiveCategory(cat)} style={{
-        padding: '7px 18px', borderRadius: '99px', fontSize: '13px', fontWeight: 500,
-        cursor: 'pointer', border: '1.5px solid', transition: 'all 0.2s ease',
-        backgroundColor: activeCategory === cat ? '#4f46e5' : 'transparent',
-        borderColor: activeCategory === cat ? '#4f46e5' : '#d1d5db',
-        color: activeCategory === cat ? '#ffffff' : '#374151'
-      }} className="interactive-btn" type="button" aria-pressed={activeCategory === cat}>{cat}</button>
-    ))}
+<div className="animate-fade-up delay-3 mt-5 anim-fade-up d2 flex min-w-0 items-center gap-2 sm:gap-4">
+  <div className="min-w-0 flex-1 overflow-x-auto sm:overflow-visible [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+    <div className="flex flex-nowrap items-center gap-2 whitespace-nowrap pr-1 sm:flex-wrap sm:gap-3 sm:whitespace-normal sm:pr-0">
+      {['All', 'Development', 'DevOps', 'AI/ML', 'Cloud', 'Cybersecurity', 'Mobile', 'Web3', 'Backend', 'Design'].map((cat) => (
+        <button
+          key={cat}
+          type="button"
+          onClick={() => setActiveCategory(cat)}
+          aria-pressed={activeCategory === cat}
+          className={`interactive-btn shrink-0 rounded-full border px-4 py-1.5 text-xs font-medium transition-all sm:text-sm ${
+            activeCategory === cat
+              ? 'border-indigo-600 bg-indigo-600 text-white'
+              : 'border-gray-300 bg-transparent text-gray-700 hover:border-indigo-300 hover:text-indigo-600'
+          }`}
+        >
+          {cat}
+        </button>
+      ))}
+    </div>
   </div>
 
-  <div className="mt-0 text-right sm:ml-auto w-full sm:w-auto">
-  <button type="button" onClick={() => setShowFilters(!showFilters)} className="interactive-btn animate-fade-up delay-4 anim-fade-up d3" style={{
-    backgroundColor: showFilters ? '#4f46e5' : '#ffffff',
-    border: '1.5px solid #4f46e5',
-    color: showFilters ? '#ffffff' : '#4f46e5',
-    borderRadius: '999px',
-    padding: '10px 18px',
-    cursor: 'pointer',
-    fontSize: '14px',
-    fontWeight: 600,
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '6px',
-    boxShadow: '0 4px 14px rgba(79, 70, 229, 0.15)',
-    transition: 'all 0.2s ease'
-  }}>
-    <svg width="16" height="16" fill="none" stroke={showFilters ? '#ffffff' : '#4f46e5'} strokeWidth="2" viewBox="0 0 24 24">
-      <line x1="4" y1="6" x2="20" y2="6"/>
-      <line x1="8" y1="12" x2="16" y2="12"/>
-      <line x1="11" y1="18" x2="13" y2="18"/>
+  <button
+    type="button"
+    onClick={() => setShowFilters(!showFilters)}
+    className={`interactive-btn animate-fade-up delay-4 anim-fade-up d3 inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border shadow-sm transition-all sm:h-auto sm:w-auto sm:gap-1.5 sm:px-4 sm:py-2.5 ${
+      showFilters
+        ? 'border-indigo-600 bg-indigo-600 text-white'
+        : 'border-indigo-600 bg-white text-indigo-600 hover:bg-indigo-50'
+    }`}
+    aria-label={showFilters ? 'Hide advanced filters' : 'Show advanced filters'}
+  >
+    <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true">
+      <line x1="4" y1="6" x2="20" y2="6" />
+      <line x1="8" y1="12" x2="16" y2="12" />
+      <line x1="11" y1="18" x2="13" y2="18" />
     </svg>
-    <span className="hidden sm:inline">{showFilters ? 'Hide Filters' : 'Advanced Filters'}</span>
+    <span className="hidden text-sm font-semibold sm:inline">{showFilters ? 'Hide Filters' : 'Advanced Filters'}</span>
   </button>
-  </div>
 </div>
 
 {showFilters && (
