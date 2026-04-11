@@ -9,7 +9,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "The Kinetic Curator",
+  title: "VickyBytes-Global Tech Hosting Platform",
   description: "Curated engineering and software experiences for the modern developer.",
 };
 

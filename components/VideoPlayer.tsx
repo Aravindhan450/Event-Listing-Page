@@ -10,6 +10,7 @@ type Speaker = {
 
 type VideoPlayerProps = {
   videoUrl?: string;
+  thumbnail?: string;
   category: string;
   date: string;
   time: string;
@@ -19,12 +20,14 @@ type VideoPlayerProps = {
 
 export default function VideoPlayer({
   videoUrl,
+  thumbnail,
   category,
   date,
   time,
   title,
   speaker,
 }: VideoPlayerProps) {
+  const [isPlaying, setIsPlaying] = useState(false);
   const [liked, setLiked] = useState(false);
   const [heartAnimating, setHeartAnimating] = useState(false);
 
@@ -37,26 +40,28 @@ export default function VideoPlayer({
   return (
     <div>
       <div className="relative aspect-video overflow-hidden rounded-xl bg-inverse-surface">
-        {videoUrl ? (
+        {isPlaying ? (
           <iframe
-            src={videoUrl}
+            src={`${videoUrl}?autoplay=1&rel=0&modestbranding=1`}
             width="100%"
             height="100%"
+            frameBorder="0"
             allowFullScreen
-            title={title}
-            className="h-full w-full border-0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center">
-            <button
-              type="button"
-              aria-label="Play video"
-              className="flex h-16 w-16 items-center justify-center rounded-full bg-white/20"
-            >
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                <path d="M6 4L16 10L6 16V4Z" fill="white" />
-              </svg>
-            </button>
+          <div
+            style={{ position: 'relative', width: '100%', height: '100%', cursor: 'pointer', borderRadius: 'inherit' }}
+            onClick={() => setIsPlaying(true)}
+          >
+            <img src={thumbnail} width="100%" height="100%" style={{ objectFit: 'cover' }} alt={title} />
+            <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ width: '72px', height: '72px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="#4f46e5" aria-hidden="true">
+                  <polygon points="5,3 19,12 5,21"/>
+                </svg>
+              </div>
+            </div>
           </div>
         )}
 

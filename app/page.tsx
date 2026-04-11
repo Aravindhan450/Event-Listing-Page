@@ -54,9 +54,10 @@ function LikeButton() {
   );
 }
 
-function EventCard({ event, query, index }: { event: any; query: string; index: number }) {
+function EventCard({ event, query, index, viewMode }: { event: any; query: string; index: number; viewMode: string }) {
   const router = useRouter();
   const [isHovered, setIsHovered] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
   const categoryPillClasses =
     event.categoryClasses ||
     "text-[10px] uppercase tracking-widest font-bold text-primary px-2 py-0.5 rounded-full bg-primary/10";
@@ -71,20 +72,50 @@ function EventCard({ event, query, index }: { event: any; query: string; index: 
 
   return (
     <div
-      className="group w-full h-full bg-surface-container-lowest rounded-xl editorial-shadow overflow-hidden transition-all hover:scale-[1.02] border border-outline-variant/10 flex flex-col cursor-pointer"
+      className="group w-full h-full bg-surface-container-lowest rounded-xl editorial-shadow overflow-hidden hover:scale-[1.02] border border-outline-variant/10 flex flex-col cursor-pointer"
       onClick={() => router.push(`/events/${event.id}`)}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      style={{ animation: `fadeSlideUp 0.5s ease-out ${0.1 + index * 0.06}s both` }}
+      style={{
+        transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+        flexDirection: viewMode === 'list' ? 'row' : 'column',
+        height: viewMode === 'list' ? '140px' : undefined
+      }}
     >
-      <div className="relative w-full h-72 overflow-hidden" style={{ position: 'relative' }}>
+      <div
+        className="relative overflow-hidden transition-transform duration-300 ease-out group-hover:scale-[1.03]"
+        style={{
+          width: viewMode === 'list' ? '200px' : '100%',
+          height: viewMode === 'list' ? '100%' : '18rem',
+          flexShrink: viewMode === 'list' ? 0 : undefined
+        }}
+      >
         <img 
           alt={event.alt} 
-          className="transition-transform group-hover:scale-105 rounded-t-xl" 
-          style={{ objectFit: 'cover', width: '100%', height: '100%' }}
+          className="rounded-t-xl" 
+          style={{
+            objectFit: 'cover',
+            width: '100%',
+            height: '100%',
+            opacity: imageLoaded ? 1 : 0.5,
+            filter: imageLoaded ? 'blur(0px)' : 'blur(8px)',
+            transition: 'opacity 0.35s ease, filter 0.35s ease, transform 0.35s ease'
+          }}
           src={event.image}
           loading="lazy"
+          onLoad={() => setImageLoaded(true)}
         />
+        {!imageLoaded && (
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'linear-gradient(110deg, #e5e7eb 8%, #f3f4f6 18%, #e5e7eb 33%)',
+              backgroundSize: '200% 100%',
+              animation: 'shimmer 1.2s linear infinite'
+            }}
+          />
+        )}
         {isHovered && (
           <div style={{
             position: 'absolute', inset: 0,
@@ -172,6 +203,7 @@ function EmptyState({
 
 export default function Page() {
   const [loading, setLoading] = useState(true);
+  const [isLoaderFading, setIsLoaderFading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
   const [showFilters, setShowFilters] = useState(false);
@@ -179,12 +211,17 @@ export default function Page() {
   const [timeRange, setTimeRange] = useState('Any Time');
   const [timeOfDay, setTimeOfDay] = useState('Any');
   const [eventType, setEventType] = useState('All Types');
+  const [viewMode, setViewMode] = useState('grid');
   const [showTrending, setShowTrending] = useState(false);
   const [showUpcoming, setShowUpcoming] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 2200);
-    return () => clearTimeout(timer);
+    const fadeTimer = setTimeout(() => setIsLoaderFading(true), 1800);
+    const hideTimer = setTimeout(() => setLoading(false), 2200);
+    return () => {
+      clearTimeout(fadeTimer);
+      clearTimeout(hideTimer);
+    };
   }, []);
 
   useEffect(() => {
@@ -201,23 +238,10 @@ export default function Page() {
 
   const finalEvents = useMemo(() => {
     const normalizedSearchQuery = searchQuery.trim().toLowerCase();
-    const now = new Date();
-
-    const normalizedEventDate = (datetime: string) => new Date((datetime || '').replace('•', ''));
-
-    const inCurrentWeek = (eventDate: Date) => {
-      const start = new Date(now);
-      start.setHours(0, 0, 0, 0);
-      start.setDate(now.getDate() - now.getDay());
-
-      const end = new Date(start);
-      end.setDate(start.getDate() + 7);
-      return eventDate >= start && eventDate < end;
+    const parseEventDate = (datetime: string) => {
+      const datePart = datetime.split('•')[0].trim();
+      return new Date(datePart);
     };
-
-    const inCurrentMonth = (eventDate: Date) => (
-      eventDate.getFullYear() === now.getFullYear() && eventDate.getMonth() === now.getMonth()
-    );
 
     const parseHour = (datetime: string) => {
       const segment = (datetime || '').split('• ')[1] || '';
@@ -256,18 +280,35 @@ export default function Page() {
         (eventType === 'Bootcamp' && (typeLower === 'bootcamp' || titleLower.includes('bootcamp'))) ||
         (eventType === 'Expo' && (typeLower === 'expo' || titleLower.includes('expo')));
 
-      const eventDate = normalizedEventDate(event.datetime || '');
-      const matchesTimeRange =
-        timeRange === 'Any Time' ||
-        (timeRange === 'Today' && eventDate.toDateString() === now.toDateString()) ||
-        (timeRange === 'This Week' && inCurrentWeek(eventDate)) ||
-        (timeRange === 'This Month' && inCurrentMonth(eventDate));
-
-      return matchesSearch && matchesCategory && matchesTimeOfDay && matchesEventType && matchesTimeRange;
+      return matchesSearch && matchesCategory && matchesTimeOfDay && matchesEventType;
     });
 
+    const today = new Date();
+    const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const endOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59);
+    const endOfWeek = new Date(startOfToday);
+    endOfWeek.setDate(startOfToday.getDate() + 7);
+    const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+
+    if (timeRange === 'Today') {
+      filteredEvents = filteredEvents.filter((event: any) => {
+        const d = parseEventDate(event.datetime);
+        return d >= startOfToday && d <= endOfToday;
+      });
+    } else if (timeRange === 'This Week') {
+      filteredEvents = filteredEvents.filter((event: any) => {
+        const d = parseEventDate(event.datetime);
+        return d >= startOfToday && d <= endOfWeek;
+      });
+    } else if (timeRange === 'This Month') {
+      filteredEvents = filteredEvents.filter((event: any) => {
+        const d = parseEventDate(event.datetime);
+        return d >= startOfToday && d <= endOfMonth;
+      });
+    }
+
     if (showUpcoming) {
-      filteredEvents = filteredEvents.filter((event: any) => normalizedEventDate(event.datetime || '') > now);
+      filteredEvents = filteredEvents.filter((event: any) => parseEventDate(event.datetime) > startOfToday);
     }
 
     if (showTrending) {
@@ -281,17 +322,19 @@ export default function Page() {
     } else if (sortBy === 'Date: Earliest') {
       filteredEvents = [...filteredEvents].sort(
         (a: any, b: any) =>
-          normalizedEventDate(a.datetime || '').getTime() - normalizedEventDate(b.datetime || '').getTime()
+          parseEventDate(a.datetime).getTime() - parseEventDate(b.datetime).getTime()
       );
     } else if (sortBy === 'Date: Latest') {
       filteredEvents = [...filteredEvents].sort(
         (a: any, b: any) =>
-          normalizedEventDate(b.datetime || '').getTime() - normalizedEventDate(a.datetime || '').getTime()
+          parseEventDate(b.datetime).getTime() - parseEventDate(a.datetime).getTime()
       );
     }
 
     return filteredEvents;
   }, [searchQuery, activeCategory, sortBy, timeRange, timeOfDay, eventType, showTrending, showUpcoming]);
+
+  const filteredEvents = finalEvents;
 
   if (loading) {
     return (
@@ -300,7 +343,9 @@ export default function Page() {
         backgroundColor: '#0f0f1a',
         display: 'flex', flexDirection: 'column',
         alignItems: 'center', justifyContent: 'center',
-        zIndex: 9999
+        zIndex: 9999,
+        opacity: isLoaderFading ? 0 : 1,
+        transition: 'opacity 0.4s ease'
       }}>
         <h1 style={{ color: '#ffffff', fontSize: '28px', fontWeight: 700, marginBottom: '12px', letterSpacing: '-0.5px' }}>
           The Kinetic Curator
@@ -336,10 +381,30 @@ export default function Page() {
     <>
 <div style={{ animation: 'fadeIn 0.6s ease-in-out' }}>
 {/*  TopNavBar Component  */}
-<nav className="bg-surface/70 backdrop-blur-md nav-grid-layout" style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', width: '100%', padding: '16px 24px', borderBottom: '1px solid #e5e7eb', boxSizing: 'border-box' }}>
+<nav className="bg-surface/70 backdrop-blur-md nav-grid-layout" style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', width: '100%', padding: '16px 24px', position: 'sticky', top: 0, zIndex: 1000, backdropFilter: 'blur(12px)', backgroundColor: 'rgba(255, 255, 255, 0.85)', borderBottom: '1px solid #e5e7eb', boxSizing: 'border-box' }}>
   {/* LEFT - column 1 */}
   <div style={{ justifySelf: 'start' }}>
-    <span style={{ fontWeight: 700, fontSize: '18px', whiteSpace: 'nowrap' }} className="text-indigo-900 tracking-tight">The Kinetic Curator</span>
+    <span style={{ fontWeight: 700, fontSize: '18px', whiteSpace: 'nowrap' }} className="text-indigo-900 tracking-tight">VickyBytes</span>
+  </div>
+
+  {/* CENTER - column 2 */}
+  <div style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: '480px' }}>
+    <div style={{
+      display: 'flex', alignItems: 'center',
+      backgroundColor: '#ffffff', borderRadius: '99px',
+      padding: '12px 16px 12px 20px',
+      border: '1px solid rgba(15, 23, 42, 0.18)',
+      boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
+      gap: '12px', width: '100%'
+    }}>
+      <svg width="18" height="18" fill="none" stroke="#6b7280" strokeWidth="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        placeholder="Search frameworks, summits, or workshops..."
+        style={{ flex: 1, border: 'none', outline: 'none', fontSize: '15px', color: '#111827', background: 'transparent' }}
+      />
+    </div>
   </div>
 
   {/* RIGHT - column 3 */}
@@ -353,34 +418,133 @@ export default function Page() {
 <main className="pt-28 pb-16 w-full" style={{ maxWidth: '1600px', margin: '0 auto', padding: '0 32px', paddingTop: '7rem' }}>
 {/*  Hero Search Section  */}
 <section className="mb-12">
-<div className="max-w-4xl mx-auto text-center mb-10">
-<h1 className="text-5xl md:text-6xl font-bold tracking-tighter text-on-surface mb-6" style={{ animation: 'fadeSlideUp 0.6s ease-out both' }}>Master the tech stack.</h1>
-<p className="text-on-surface-variant text-lg" style={{ animation: 'fadeSlideUp 0.6s ease-out 0.15s both' }}>Curated engineering and software experiences for the modern developer.</p>
-</div>
-<div style={{
-  display: 'flex', alignItems: 'center',
-  backgroundColor: '#ffffff', borderRadius: '99px',
-  padding: '12px 16px 12px 20px',
-  boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
-  gap: '12px', width: '100%', maxWidth: '760px', margin: '0 auto'
-}}>
-  <svg width="18" height="18" fill="none" stroke="#6b7280" strokeWidth="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-  <input
-    value={searchQuery}
-    onChange={(e) => setSearchQuery(e.target.value)}
-    placeholder="Search frameworks, summits, or workshops..."
-    style={{ flex: 1, border: 'none', outline: 'none', fontSize: '15px', color: '#111827', background: 'transparent' }}
-  />
-  <button style={{
-    backgroundColor: '#4f46e5', color: '#ffffff',
-    border: 'none', borderRadius: '99px',
-    padding: '10px 24px', fontSize: '14px',
-    fontWeight: 600, cursor: 'pointer',
-    whiteSpace: 'nowrap'
-  }}>Explore</button>
+<div style={{ width: '100%', padding: '16px 48px 0', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+  <span className="animate-fade-up" style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.12em', color: '#6b7280', textTransform: 'uppercase', animationDelay: '0s' }}>
+    LIVE EVENTS PLATFORM
+  </span>
+
+  <h1 className="animate-fade-up" style={{ fontSize: 'clamp(36px, 5vw, 64px)', fontWeight: 900, color: '#0f172a', lineHeight: 1.1, letterSpacing: '-2px', maxWidth: '700px', margin: 0, animationDelay: '0.1s' }}>
+    The platform where
+    <br />
+    developers level up.
+  </h1>
+
+  <p className="animate-fade-up" style={{ fontSize: '16px', color: '#6b7280', maxWidth: '480px', margin: 0, animationDelay: '0.2s' }}>
+    Live summits, workshops, and bootcamps from senior engineers — free to attend.
+  </p>
+
+  <div className="animate-fade-up" style={{ display: 'grid', gridTemplateColumns: '1.2fr 2fr 1.5fr 0.8fr', gap: '8px', width: '100%', height: '360px', marginTop: '8px', borderRadius: '16px', overflow: 'hidden', animationDelay: '0.4s' }}>
+    <div className="mosaic-wrap">
+      <img src="https://images.unsplash.com/photo-1591115765373-5207764f72e7?w=400&h=400&fit=crop" className="mosaic-img" style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scale(1)', transition: 'transform 0.4s ease' }} alt="Tech conference audience" loading="lazy" />
+    </div>
+    <div className="mosaic-wrap">
+      <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&h=400&fit=crop" className="mosaic-img" style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scale(1)', transition: 'transform 0.4s ease' }} alt="Developers collaborating at office" loading="lazy" />
+    </div>
+    <div className="mosaic-wrap">
+      <img src="https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=600&h=400&fit=crop" className="mosaic-img" style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scale(1)', transition: 'transform 0.4s ease' }} alt="Presenter on stage with screen" loading="lazy" />
+    </div>
+    <div className="mosaic-wrap">
+      <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&h=400&fit=crop" className="mosaic-img" style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scale(1)', transition: 'transform 0.4s ease' }} alt="Developer coding at night setup" loading="lazy" />
+    </div>
+  </div>
+
+  <div className="stats-row animate-fade-up" style={{ display: 'flex', justifyContent: 'center', gap: '16px', flexWrap: 'wrap', width: '100%', maxWidth: '760px', margin: '32px auto', animationDelay: '0.5s' }}>
+    {[
+      ['16 Events', 'Across 8 categories'],
+      ['3 Live Today', 'Join now free'],
+      ['2,400+ Devs', 'Active this month'],
+    ].map(([stat, subLabel]) => {
+      const [statNumber, ...statLabelParts] = stat.split(' ');
+      const statLabel = statLabelParts.join(' ');
+
+      return (
+      <div
+        key={stat}
+        className="stats-card stat-card"
+        style={{
+          backgroundColor: '#ffffff',
+          border: '1.5px solid #e5e7eb',
+          borderRadius: '16px',
+          padding: '24px 32px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '4px',
+          flex: 1,
+          minWidth: '160px',
+          boxShadow: '0 2px 12px rgba(0,0,0,0.05)',
+          transition: 'transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease'
+        }}
+      >
+        <div style={{ fontSize: '28px', fontWeight: 800, color: '#0f172a', letterSpacing: '-1px' }}>{statNumber}</div>
+        <div style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a' }}>{statLabel}</div>
+        <div style={{ fontSize: '12px', color: '#9ca3af', marginTop: '2px' }}>{subLabel}</div>
+      </div>
+      );
+    })}
+  </div>
 </div>
 
-<div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center', flexWrap: 'wrap', marginTop: '16px' }}>
+<div style={{
+  display: 'flex', alignItems: 'center',
+  justifyContent: 'space-between',
+  width: '100%', padding: '32px 48px 0',
+  borderTop: '1px solid #e5e7eb'
+}}>
+
+  <div>
+    <h2 style={{ fontSize: '22px', fontWeight: 800, color: '#0f172a', margin: 0, letterSpacing: '-0.5px' }}>
+      Browse Events
+    </h2>
+    <p style={{ fontSize: '13px', color: '#9ca3af', margin: '4px 0 0' }}>
+      {filteredEvents.length} events found
+    </p>
+  </div>
+
+  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', backgroundColor: '#f1f5f9', borderRadius: '10px', padding: '4px' }}>
+    <button
+      onClick={() => setViewMode('grid')}
+      style={{
+        padding: '7px 14px', borderRadius: '8px', border: 'none', cursor: 'pointer',
+        fontSize: '13px', fontWeight: 600,
+        backgroundColor: viewMode === 'grid' ? '#ffffff' : 'transparent',
+        color: viewMode === 'grid' ? '#0f172a' : '#9ca3af',
+        boxShadow: viewMode === 'grid' ? '0 1px 4px rgba(0,0,0,0.08)' : 'none',
+        transition: 'all 0.2s ease',
+        display: 'flex', alignItems: 'center', gap: '6px'
+      }}>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+        <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+      </svg>
+      Grid
+    </button>
+    <button
+      onClick={() => setViewMode('list')}
+      style={{
+        padding: '7px 14px', borderRadius: '8px', border: 'none', cursor: 'pointer',
+        fontSize: '13px', fontWeight: 600,
+        backgroundColor: viewMode === 'list' ? '#ffffff' : 'transparent',
+        color: viewMode === 'list' ? '#0f172a' : '#9ca3af',
+        boxShadow: viewMode === 'list' ? '0 1px 4px rgba(0,0,0,0.08)' : 'none',
+        transition: 'all 0.2s ease',
+        display: 'flex', alignItems: 'center', gap: '6px'
+      }}>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+      List
+    </button>
+  </div>
+
+</div>
+
+<div style={{ padding: '32px 48px 0' }}>
+<div style={{ textAlign: 'center' }}>
+  <h2 className="text-2xl md:text-3xl font-semibold text-gray-900">Explore Events</h2>
+  <p className="text-gray-600 mt-2">Find technical events across cloud, AI, DevOps, and emerging technologies.</p>
+</div>
+<div className="animate-fade-up mt-6" style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center', flexWrap: 'wrap', animationDelay: '0.2s' }}>
   {['All', 'Development', 'DevOps', 'AI/ML', 'Cloud', 'Cybersecurity', 'Mobile', 'Web3', 'Backend', 'Design'].map(cat => (
     <button key={cat} onClick={() => setActiveCategory(cat)} style={{
       padding: '7px 18px', borderRadius: '99px', fontSize: '13px', fontWeight: 500,
@@ -388,17 +552,27 @@ export default function Page() {
       backgroundColor: activeCategory === cat ? '#4f46e5' : 'transparent',
       borderColor: activeCategory === cat ? '#4f46e5' : '#d1d5db',
       color: activeCategory === cat ? '#ffffff' : '#374151'
-    }}>{cat}</button>
+    }} className="interactive-btn">{cat}</button>
   ))}
 </div>
-
-<div style={{ textAlign: 'center', marginTop: '14px' }}>
-  <button onClick={() => setShowFilters(!showFilters)} style={{
-    background: 'none', border: 'none', cursor: 'pointer',
-    color: '#4f46e5', fontSize: '14px', fontWeight: 600,
-    display: 'inline-flex', alignItems: 'center', gap: '6px'
+<div style={{ textAlign: 'center', marginTop: '16px' }}>
+  <button onClick={() => setShowFilters(!showFilters)} className="interactive-btn animate-fade-up" style={{
+    backgroundColor: showFilters ? '#4f46e5' : '#ffffff',
+    border: '1.5px solid #4f46e5',
+    color: showFilters ? '#ffffff' : '#4f46e5',
+    borderRadius: '999px',
+    padding: '10px 18px',
+    cursor: 'pointer',
+    fontSize: '14px',
+    fontWeight: 600,
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '6px',
+    boxShadow: '0 4px 14px rgba(79, 70, 229, 0.15)',
+    transition: 'all 0.2s ease',
+    animationDelay: '0.3s'
   }}>
-    <svg width="16" height="16" fill="none" stroke="#4f46e5" strokeWidth="2" viewBox="0 0 24 24">
+    <svg width="16" height="16" fill="none" stroke={showFilters ? '#ffffff' : '#4f46e5'} strokeWidth="2" viewBox="0 0 24 24">
       <line x1="4" y1="6" x2="20" y2="6"/>
       <line x1="8" y1="12" x2="16" y2="12"/>
       <line x1="11" y1="18" x2="13" y2="18"/>
@@ -426,7 +600,7 @@ export default function Page() {
           backgroundColor: sortBy === opt ? '#4f46e5' : 'transparent',
           borderColor: sortBy === opt ? '#4f46e5' : '#d1d5db',
           color: sortBy === opt ? '#ffffff' : '#374151'
-        }}>{opt}</button>
+        }} className="interactive-btn">{opt}</button>
       ))}
     </div>
 
@@ -440,7 +614,7 @@ export default function Page() {
           backgroundColor: timeRange === opt ? '#4f46e5' : 'transparent',
           borderColor: timeRange === opt ? '#4f46e5' : '#d1d5db',
           color: timeRange === opt ? '#ffffff' : '#374151'
-        }}>{opt}</button>
+        }} className="interactive-btn">{opt}</button>
       ))}
     </div>
 
@@ -454,7 +628,7 @@ export default function Page() {
           backgroundColor: timeOfDay === opt ? '#4f46e5' : 'transparent',
           borderColor: timeOfDay === opt ? '#4f46e5' : '#d1d5db',
           color: timeOfDay === opt ? '#ffffff' : '#374151'
-        }}>{opt}</button>
+        }} className="interactive-btn">{opt}</button>
       ))}
     </div>
 
@@ -468,7 +642,7 @@ export default function Page() {
           backgroundColor: eventType === opt ? '#4f46e5' : 'transparent',
           borderColor: eventType === opt ? '#4f46e5' : '#d1d5db',
           color: eventType === opt ? '#ffffff' : '#374151'
-        }}>{opt}</button>
+        }} className="interactive-btn">{opt}</button>
       ))}
     </div>
 
@@ -481,14 +655,14 @@ export default function Page() {
         backgroundColor: showTrending ? '#4f46e5' : 'transparent',
         borderColor: showTrending ? '#4f46e5' : '#d1d5db',
         color: showTrending ? '#ffffff' : '#374151'
-      }}>🔥 Trending</button>
+      }} className="interactive-btn">🔥 Trending</button>
       <button onClick={() => setShowUpcoming(!showUpcoming)} style={{
         padding: '6px 14px', borderRadius: '99px', fontSize: '13px', fontWeight: 500, cursor: 'pointer',
         border: '1.5px solid', transition: 'all 0.2s ease',
         backgroundColor: showUpcoming ? '#4f46e5' : 'transparent',
         borderColor: showUpcoming ? '#4f46e5' : '#d1d5db',
         color: showUpcoming ? '#ffffff' : '#374151'
-      }}>📅 Upcoming Only</button>
+      }} className="interactive-btn">📅 Upcoming Only</button>
       <button onClick={() => {
         setSortBy('Default'); setTimeRange('Any Time');
         setTimeOfDay('Any'); setEventType('All Types');
@@ -496,11 +670,12 @@ export default function Page() {
       }} style={{
         padding: '6px 14px', borderRadius: '99px', fontSize: '13px', fontWeight: 500, cursor: 'pointer',
         border: '1.5px solid #ef4444', color: '#ef4444', background: 'transparent', transition: 'all 0.2s ease'
-      }}>✕ Clear All</button>
+      }} className="interactive-btn">✕ Clear All</button>
     </div>
 
   </div>
 )}
+</div>
 </section>
 {/*  Events Grid  */}
 {finalEvents.length === 0 ? (
@@ -512,18 +687,18 @@ export default function Page() {
   />
 ) : (
   <>
-    <p className="text-sm text-gray-500 mb-4">{finalEvents.length} events found</p>
     <div
       className="event-grid"
       style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(4, 1fr)',
-         gap: '28px',
+        gridTemplateColumns: viewMode === 'grid' ? 'repeat(4, 1fr)' : '1fr',
+        gap: '28px',
+        marginTop: '16px',
         width: '100%'
       }}
     >
       {finalEvents.map((event: any, index: number) => (
-        <EventCard key={event.id} event={event} query={searchQuery} index={index} />
+        <EventCard key={event.id} event={event} query={searchQuery} index={index} viewMode={viewMode} />
       ))}
     </div>
   </>
@@ -535,7 +710,7 @@ export default function Page() {
 </div>
 <style>{`
   @keyframes fadeSlideUp {
-    from { opacity: 0; transform: translateY(24px); }
+    from { opacity: 0; transform: translateY(32px); }
     to { opacity: 1; transform: translateY(0); }
   }
 
@@ -544,9 +719,63 @@ export default function Page() {
     to { opacity: 1; }
   }
 
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .animate-fade-up {
+    opacity: 0;
+    animation: fadeUp 0.5s ease-out forwards;
+  }
+
+  .animate-fade-in {
+    opacity: 0;
+    animation: fadeIn 0.4s ease-out forwards;
+  }
+
+  .mosaic-img { transition: transform 0.4s ease; }
+
+  .mosaic-img:hover { transform: scale(1.05); }
+
+  .mosaic-wrap { overflow: hidden; }
+
+  .stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    border-color: #4f46e5;
+  }
+
   @keyframes scaleIn {
     from { opacity: 0; transform: scale(0.95); }
     to { opacity: 1; transform: scale(1); }
+  }
+
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  .interactive-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.14);
+  }
+
+  .interactive-btn:active {
+    transform: translateY(0) scale(0.98);
+  }
+
+  @media (max-width: 768px) {
+    .minimal-hero {
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      gap: 16px !important;
+      padding: 48px 24px 32px !important;
+    }
+
+    .minimal-hero-pills {
+      justify-content: flex-start !important;
+    }
   }
 
   @media (max-width: 1024px) {
@@ -555,6 +784,7 @@ export default function Page() {
 
   @media (max-width: 640px) {
     .event-grid { grid-template-columns: repeat(1, 1fr) !important; }
+    .stats-card { min-width: 140px !important; }
   }
 `}</style>
     </>

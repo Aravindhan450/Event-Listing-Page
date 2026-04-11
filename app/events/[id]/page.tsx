@@ -1,44 +1,58 @@
-import type { Metadata } from 'next';
+"use client";
+
 import VideoPlayer from '../../../components/VideoPlayer';
 import LiveChat from '../../../components/LiveChat';
+import { useParams } from 'next/navigation';
+import { events } from '../../../data/events';
 
-type EventPageProps = {
-  params: { id: string };
-};
+export default function EventDetailPage() {
+  const { id } = useParams<{ id: string }>();
+  const parsedId = parseInt(id, 10);
+  const matchedEvent = events.find((e: any) => e.id === parsedId);
 
-const EVENT_DATA = {
-  id: 'event-001',
-  title: 'Cloud Native Systems Summit 2024',
-  category: 'CLOUD',
-  date: 'Nov 15, 2024',
-  time: '09:00 AM PST',
-  description: [
-    'Join a global lineup of engineers, architects, and platform leaders for a deep dive into cloud-native systems, resilient infrastructure, and modern service operations.',
-    'This event explores practical implementation patterns for scalable distributed systems, secure platform design, and high-performance workloads in production environments.',
-    'Expect actionable sessions, live technical walkthroughs, and strategic discussions focused on building reliable platforms for the next decade of software delivery.',
-  ],
-  tags: ['Cloud', 'Kubernetes', 'Platform Engineering', 'DevOps'],
-  speaker: {
-    name: 'Avery Kim',
-    role: 'Principal Cloud Architect',
-    avatarInitials: 'AK',
-  },
-  videoUrl: '',
-  viewerCount: 1248,
-};
+  if (!matchedEvent) {
+    return (
+      <div className="event-page min-h-screen bg-background text-on-background">
+        <main className="mx-auto flex min-h-screen max-w-7xl items-center justify-center p-6">
+          <div className="text-center">
+            <h1 className="text-3xl font-bold text-on-surface">Event not found</h1>
+            <a href="/" className="mt-4 inline-block text-primary hover:underline">Go back home</a>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
-export async function generateMetadata(): Promise<Metadata> {
-  return {
-    title: `${EVENT_DATA.title} | The Kinetic Curator`,
-    description:
-      `Watch ${EVENT_DATA.title} on The Kinetic Curator. Live on ${EVENT_DATA.date} at ${EVENT_DATA.time}.`,
-  };
-}
+  const [date, time] = (matchedEvent.datetime || '').split('•').map((value: string) => value.trim());
+  const speakerName = matchedEvent.alt || matchedEvent.title;
+  const speakerInitials = speakerName
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part: string) => part[0])
+    .join('')
+    .toUpperCase();
 
-export default function EventDetailPage({ params }: EventPageProps) {
   const event = {
-    ...EVENT_DATA,
-    id: params.id,
+    id: matchedEvent.id,
+    title: matchedEvent.title,
+    category: matchedEvent.category,
+    date,
+    time,
+    description: [
+      `${matchedEvent.title} is part of our curated ${matchedEvent.category} track for modern engineering teams.`,
+      `Explore practical patterns, implementation strategies, and production lessons from experienced builders in this ${matchedEvent.type} session.`,
+      `Use this event to deepen your understanding and connect with developers working on similar challenges.`,
+    ],
+    tags: [matchedEvent.category, matchedEvent.type],
+    speaker: {
+      name: speakerName,
+      role: `${matchedEvent.category} Session Host`,
+      avatarInitials: speakerInitials || 'EV',
+    },
+    videoUrl: matchedEvent.videoUrl,
+    viewerCount: 1000 + matchedEvent.id * 37,
+    image: matchedEvent.image,
   };
 
   return (
@@ -92,6 +106,7 @@ export default function EventDetailPage({ params }: EventPageProps) {
         <section className="space-y-6 lg:col-start-1">
             <VideoPlayer
               videoUrl={event.videoUrl}
+              thumbnail={event.image}
               category={event.category}
               date={event.date}
               time={event.time}

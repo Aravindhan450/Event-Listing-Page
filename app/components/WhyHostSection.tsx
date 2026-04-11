@@ -58,7 +58,7 @@ export default function WhyHostSection() {
           transition={{ duration: 0.5, ease: 'easeOut', delay: 0.15 }}
           viewport={{ once: true }}
         >
-          TechNexus provides the infrastructure, the audience, and the prestige to elevate your technical event.
+          VickyBytes provides the infrastructure, the audience, and the prestige to elevate your technical event.
         </motion.p>
       </div>
 

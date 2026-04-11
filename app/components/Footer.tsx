@@ -10,7 +10,7 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-6 py-16">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
           <div>
-            <h3 className="text-2xl font-bold text-slate-900 tracking-tight mb-4">TechNexus</h3>
+            <h3 className="text-2xl font-bold text-slate-900 tracking-tight mb-4">VickyBytes</h3>
             <p className="text-slate-600 leading-relaxed mb-6 max-w-sm">
               Curating the world&#39;s premier technical knowledge exchange platforms.
             </p>
@@ -67,7 +67,7 @@ export default function Footer() {
       <div className="border-t border-slate-200/80">
         <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <p className="text-sm text-slate-600">
-            © 2024 TechNexus Global Curator. Built for the kinetic era.
+            © 2024 VickyBytes Global Tech Hosting Platform. Built for the kinetic era.
           </p>
           <div className="flex items-center gap-5 text-sm">
             {bottomLinks.map((link) => (
