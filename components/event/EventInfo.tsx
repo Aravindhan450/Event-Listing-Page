@@ -62,7 +62,7 @@ export default function EventInfo({
   return (
     <>
       <div className="animate-fade-up delay-2 anim-fade-up d2" style={{ marginTop: '12px', marginBottom: '8px' }}>
-        <h1 style={{ fontSize: '20px', fontWeight: 700, color: '#0f172a', margin: 0, lineHeight: 1.3 }}>{title}</h1>
+        <h1 style={{ fontSize: 'clamp(18px, 3.4vw, 22px)', fontWeight: 700, color: '#0f172a', margin: 0, lineHeight: 1.3 }}>{title}</h1>
       </div>
 
       <ShareModal show={showShareModal} onClose={() => setShowShareModal(false)} />
@@ -157,7 +157,7 @@ export default function EventInfo({
           margin: '8px 0 0'
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
           <div>
             <div
               style={{
@@ -186,11 +186,12 @@ export default function EventInfo({
               backgroundColor: subscribed ? '#f1f5f9' : '#0f172a',
               color: subscribed ? '#0f172a' : '#ffffff',
               borderRadius: '99px',
-              padding: '6px 16px',
+              padding: '8px 16px',
               border: subscribed ? '1px solid #e5e7eb' : 'none',
               cursor: 'pointer',
               fontWeight: 600,
               fontSize: '13px',
+              minHeight: '36px',
               transition: 'background-color 0.2s ease, color 0.2s ease, border 0.2s ease'
             }}
           >
@@ -198,7 +199,7 @@ export default function EventInfo({
           </button>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: 'auto' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: 'auto', flexWrap: 'wrap' }}>
           <button
             type="button"
             aria-label="Like event"
@@ -211,6 +212,7 @@ export default function EventInfo({
               display: 'inline-flex',
               alignItems: 'center',
               gap: '6px',
+              minHeight: '36px',
               cursor: 'pointer'
             }}
           >
@@ -235,6 +237,7 @@ export default function EventInfo({
               fontSize: '13px',
               fontWeight: 600,
               color: '#374151',
+              minHeight: '36px',
               cursor: 'pointer'
             }}
           >
@@ -248,6 +251,7 @@ export default function EventInfo({
               borderRadius: '999px',
               padding: '6px 10px',
               backgroundColor: '#ffffff',
+              minHeight: '36px',
               cursor: 'pointer',
               color: '#374151'
             }}
@@ -267,13 +271,13 @@ export default function EventInfo({
           marginTop: '12px'
         }}
       >
-        <div className="anim-fade-up d3" style={{ fontSize: '13px', color: '#374151', marginBottom: '10px', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '6px' }}>
+        <div className="event-meta-list anim-fade-up d3" style={{ fontSize: '13px', color: '#374151', marginBottom: '10px', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '6px' }}>
           <span style={{ fontWeight: 600 }}>{viewerCount.toLocaleString()} watching now</span>
-          <span style={{ color: '#9ca3af' }}>•</span>
+          <span className="meta-dot" style={{ color: '#9ca3af' }}>•</span>
           <span>Started {time ? `${date} ${time}` : date}</span>
-          <span style={{ color: '#9ca3af' }}>•</span>
+          <span className="meta-dot" style={{ color: '#9ca3af' }}>•</span>
           <span>{category}</span>
-          <span style={{ color: '#9ca3af' }}>•</span>
+          <span className="meta-dot" style={{ color: '#9ca3af' }}>•</span>
           <span>{eventType}</span>
         </div>
 
@@ -363,6 +367,16 @@ export default function EventInfo({
         @media (max-width: 639px) {
           .event-streamer-row {
             flex-wrap: wrap;
+          }
+
+          .event-meta-list {
+            flex-direction: column;
+            align-items: flex-start !important;
+            gap: 2px !important;
+          }
+
+          .event-meta-list .meta-dot {
+            display: none;
           }
         }
       `}</style>

@@ -123,25 +123,36 @@ export default function LiveChat({ viewerCount }: LiveChatProps) {
   const [newMessagesStartIndex, setNewMessagesStartIndex] = useState<number | null>(null);
   const messagesListRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const isPausedRef = useRef(isPaused);
 
   const meColor = useMemo(() => 'text-primary bg-primary/10', []);
+
+  useEffect(() => {
+    isPausedRef.current = isPaused;
+  }, [isPaused]);
 
   useEffect(() => {
     const intervalId = setInterval(() => {
       const randomUser = USER_STYLES[Math.floor(Math.random() * USER_STYLES.length)];
       const randomText = RANDOM_MESSAGE_POOL[Math.floor(Math.random() * RANDOM_MESSAGE_POOL.length)];
 
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now(),
-          initials: randomUser.initials,
-          color: randomUser.color,
-          name: randomUser.name,
-          text: randomText,
-          time: getCurrentTime(),
-        },
-      ]);
+      setMessages((prev) => {
+        if (isPausedRef.current) {
+          setHasNewMessages(true);
+        }
+
+        return [
+          ...prev,
+          {
+            id: Date.now(),
+            initials: randomUser.initials,
+            color: randomUser.color,
+            name: randomUser.name,
+            text: randomText,
+            time: getCurrentTime(),
+          },
+        ];
+      });
 
       // Reset interval with a new random delay between 4s and 6s.
       setIntervalDelay(getRandomDelayMs());
@@ -157,40 +168,14 @@ export default function LiveChat({ viewerCount }: LiveChatProps) {
     }
 
     if (isPaused) {
-      setHasNewMessages(true);
       return;
     }
-
-    setHasNewMessages(false);
 
     list.scrollTo({
       top: list.scrollHeight,
       behavior: 'smooth',
     });
   }, [messages, isPaused]);
-
-  useEffect(() => {
-    if (isPaused) {
-      return;
-    }
-
-    const list = messagesListRef.current;
-    if (!list) {
-      return;
-    }
-
-    setHasNewMessages(false);
-    list.scrollTo({
-      top: list.scrollHeight,
-      behavior: 'smooth',
-    });
-  }, [isPaused]);
-
-  useEffect(() => {
-    if (isPaused) {
-      setNewMessagesStartIndex(messages.length);
-    }
-  }, [isPaused, messages.length]);
 
   useEffect(() => {
     const handleMouseDown = (event: MouseEvent) => {
@@ -211,17 +196,23 @@ export default function LiveChat({ viewerCount }: LiveChatProps) {
       return;
     }
 
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: nextId,
-        initials: 'ME',
-        color: meColor,
-        name: 'You',
-        text: trimmed,
-        time: getCurrentTime(),
-      },
-    ]);
+    setMessages((prev) => {
+      if (isPausedRef.current) {
+        setHasNewMessages(true);
+      }
+
+      return [
+        ...prev,
+        {
+          id: nextId,
+          initials: 'ME',
+          color: meColor,
+          name: 'You',
+          text: trimmed,
+          time: getCurrentTime(),
+        },
+      ];
+    });
     setNextId((id) => id + 1);
     setDraft('');
 
@@ -254,6 +245,7 @@ export default function LiveChat({ viewerCount }: LiveChatProps) {
 
   return (
     <aside
+      className="h-full min-h-0 w-full max-h-full"
       style={{
         backgroundColor: '#f8fafc',
         borderRadius: '16px',
@@ -264,17 +256,18 @@ export default function LiveChat({ viewerCount }: LiveChatProps) {
       }}
     >
       <div
+        className="px-3 py-3 sm:px-4"
         style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '14px 16px',
           borderBottom: '2px solid #e5e7eb',
           backgroundColor: '#ffffff',
-          flexShrink: 0
+          flexShrink: 0,
+          gap: '10px'
         }}
       >
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
           <span
             style={{
               width: '8px',
@@ -285,17 +278,17 @@ export default function LiveChat({ viewerCount }: LiveChatProps) {
             }}
             aria-hidden="true"
           />
-          <span style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', color: '#0f172a', textTransform: 'uppercase' }}>
+          <span className="text-[11px] font-bold uppercase tracking-widest text-slate-900 sm:text-xs" style={{ color: '#0f172a' }}>
             LIVE CHAT
           </span>
         </div>
 
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 600, color: '#6b7280' }}>
+        <div className="flex flex-wrap items-center justify-end gap-1.5 sm:gap-2" style={{ minWidth: 0 }}>
+          <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-500 sm:text-xs" style={{ color: '#6b7280' }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M16 11c1.66 0 2.99-1.57 2.99-3.5S17.66 4 16 4s-3 1.57-3 3.5S14.34 11 16 11Zm-8 0c1.66 0 2.99-1.57 2.99-3.5S9.66 4 8 4 5 5.57 5 7.5 6.34 11 8 11Zm0 2c-2.33 0-7 1.17-7 3.5V20h14v-3.5C15 14.17 10.33 13 8 13Zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.96 1.97 3.45V20h6v-3.5c0-2.33-4.67-3.5-7-3.5Z" fill="currentColor"/>
             </svg>
-            {viewerCount} viewers
+            <span className="whitespace-nowrap">{viewerCount} viewers</span>
           </span>
 
           {slowMode && (
@@ -339,8 +332,14 @@ export default function LiveChat({ viewerCount }: LiveChatProps) {
 
       <div
         ref={messagesListRef}
-        onMouseEnter={() => setIsPaused(true)}
-        onMouseLeave={() => setIsPaused(false)}
+        onMouseEnter={() => {
+          setNewMessagesStartIndex(messages.length);
+          setIsPaused(true);
+        }}
+        onMouseLeave={() => {
+          setIsPaused(false);
+          setHasNewMessages(false);
+        }}
         className="relative space-y-2 [scrollbar-gutter:stable]"
         style={{ backgroundColor: '#f8fafc', flex: 1, overflowY: 'auto', minHeight: 0, padding: '8px 0' }}
       >
@@ -365,7 +364,7 @@ export default function LiveChat({ viewerCount }: LiveChatProps) {
               <div
                 onMouseEnter={() => setHoveredMessage(message.id)}
                 onMouseLeave={() => setHoveredMessage(null)}
-                className={`chat-message-row flex items-start gap-3 ${
+                className={`chat-message-row flex items-start gap-2.5 sm:gap-3 ${
                   index === messages.length - 1 && messages.length > INITIAL_MESSAGES.length
                     ? 'chat-message-new'
                     : ''
@@ -407,7 +406,7 @@ export default function LiveChat({ viewerCount }: LiveChatProps) {
                   </div>
                 )}
 
-                <div className={`h-8 w-8 rounded-full ${bgClass} ${textClass} text-xs font-semibold flex items-center justify-center`}>
+                <div className={`h-8 w-8 shrink-0 rounded-full ${bgClass} ${textClass} text-xs font-semibold flex items-center justify-center`}>
                   {message.initials}
                 </div>
                 <div className="min-w-0">
@@ -496,8 +495,8 @@ export default function LiveChat({ viewerCount }: LiveChatProps) {
         )}
       </div>
 
-      <div style={{ padding: '10px 12px', borderTop: '2px solid #e5e7eb', backgroundColor: '#ffffff', flexShrink: 0 }}>
-        <div className="flex items-center gap-2" style={{ position: 'relative' }}>
+      <div className="px-2.5 py-2.5 sm:px-3 sm:py-2.5" style={{ borderTop: '2px solid #e5e7eb', backgroundColor: '#ffffff', flexShrink: 0 }}>
+        <div className="flex items-center gap-1.5 sm:gap-2" style={{ position: 'relative' }}>
           {showEmojiPicker && (
             <div
               className="emoji-picker-panel"
@@ -513,7 +512,7 @@ export default function LiveChat({ viewerCount }: LiveChatProps) {
                 display: 'flex',
                 flexWrap: 'wrap',
                 gap: '6px',
-                width: '260px',
+                width: 'min(260px, calc(100vw - 32px))',
                 zIndex: 20
               }}
             >
@@ -563,7 +562,7 @@ export default function LiveChat({ viewerCount }: LiveChatProps) {
               backgroundColor: '#f1f5f9',
               border: '1px solid #e2e8f0',
               borderRadius: '99px',
-              padding: '8px 14px',
+              padding: '8px 12px',
               fontSize: '13px',
               outline: 'none'
             }}
@@ -597,7 +596,7 @@ export default function LiveChat({ viewerCount }: LiveChatProps) {
               backgroundColor: '#4f46e5',
               color: '#ffffff',
               borderRadius: '99px',
-              padding: '8px 18px',
+              padding: '8px 14px',
               fontSize: '13px',
               fontWeight: 600,
               border: 'none',
@@ -657,6 +656,12 @@ export default function LiveChat({ viewerCount }: LiveChatProps) {
         .chat-message-host {
           border-left: 3px solid #4f46e5;
           background-color: #f5f3ff;
+        }
+
+        @media (min-width: 640px) {
+          .emoji-picker-panel {
+            width: 260px !important;
+          }
         }
       `}</style>
     </aside>

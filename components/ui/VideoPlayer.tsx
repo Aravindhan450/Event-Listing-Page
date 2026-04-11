@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import EventInfo from '../event/EventInfo';
 
 type Speaker = {
@@ -58,7 +59,17 @@ export default function VideoPlayer({
               style={{ position: 'absolute', inset: 0, cursor: 'pointer', borderRadius: 'inherit' }}
               onClick={() => setIsPlaying(true)}
             >
-              <img src={thumbnail} width="100%" height="100%" style={{ objectFit: 'cover' }} alt={title} />
+              {thumbnail ? (
+                <Image
+                  src={thumbnail}
+                  alt={title}
+                  fill
+                  sizes="(max-width: 767px) 100vw, (max-width: 1023px) 100vw, 70vw"
+                  className="object-cover"
+                />
+              ) : (
+                <div style={{ position: 'absolute', inset: 0, backgroundColor: '#1f2937' }} />
+              )}
               <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <div style={{ width: '72px', height: '72px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="#4f46e5" aria-hidden="true">

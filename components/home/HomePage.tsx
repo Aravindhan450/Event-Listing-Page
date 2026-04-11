@@ -1,10 +1,12 @@
 "use client";
 import React, { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { events } from '../../data/events';
 import WhyHostSection from './WhyHostSection';
 import Footer from '../ui/Footer';
 import Navbar from '../ui/Navbar';
+import type { Event } from '../../types/event';
 
 const ALLOWED_CATEGORIES = ['Development', 'DevOps', 'AI/ML', 'Cloud', 'Cybersecurity', 'Mobile', 'Web3', 'Backend', 'Design'];
 
@@ -39,6 +41,8 @@ function LikeButton() {
   const [liked, setLiked] = useState(false);
   return (
     <button 
+      type="button"
+      aria-label={liked ? 'Remove from favorites' : 'Add to favorites'}
       onClick={(e) => {
         e.preventDefault();
         setLiked(!liked);
@@ -46,7 +50,7 @@ function LikeButton() {
       className="absolute top-3 right-3 p-2 rounded-full bg-surface/80 backdrop-blur-sm transition-colors duration-200 cursor-pointer active:scale-110"
     >
       <span 
-        className={`material-symbols-outlined !text-xl ${liked ? 'text-[#ef4444]' : 'text-white'}`}
+        className={`material-symbols-outlined text-xl! ${liked ? 'text-[#ef4444]' : 'text-white'}`}
         style={{ fontVariationSettings: liked ? "'FILL' 1" : "'FILL' 0" }}
       >
         favorite
@@ -55,7 +59,7 @@ function LikeButton() {
   );
 }
 
-function EventCard({ event, query, index, viewMode }: { event: any; query: string; index: number; viewMode: string }) {
+function EventCard({ event, query, viewMode }: { event: Event; query: string; viewMode: string }) {
   const router = useRouter();
   const [isHovered, setIsHovered] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -72,32 +76,44 @@ function EventCard({ event, query, index, viewMode }: { event: any; query: strin
       : '');
 
   return (
-    <div
-      className="group w-full h-full bg-surface-container-lowest rounded-xl editorial-shadow overflow-hidden hover:scale-[1.02] border border-outline-variant/10 flex flex-col cursor-pointer"
+    <article
+      role="button"
+      tabIndex={0}
+      aria-label={`Open event ${event.title}`}
+      className={`group w-full h-full bg-surface-container-lowest rounded-xl editorial-shadow overflow-hidden hover:scale-[1.02] border border-outline-variant/10 flex cursor-pointer ${
+        viewMode === 'list' ? 'flex-col sm:flex-row sm:h-[140px]' : 'flex-col'
+      }`}
       onClick={() => router.push(`/events/${event.id}`)}
+      onKeyDown={(eventKey) => {
+        if (eventKey.key === 'Enter' || eventKey.key === ' ') {
+          eventKey.preventDefault();
+          router.push(`/events/${event.id}`);
+        }
+      }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       style={{
-        transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-        flexDirection: viewMode === 'list' ? 'row' : 'column',
-        height: viewMode === 'list' ? '140px' : undefined
+        transition: 'transform 0.2s ease, box-shadow 0.2s ease'
       }}
     >
       <div
-        className="relative overflow-hidden transition-transform duration-300 ease-out group-hover:scale-[1.03]"
+        className={`relative overflow-hidden transition-transform duration-300 ease-out group-hover:scale-[1.03] ${
+          viewMode === 'list' ? 'w-full sm:w-[200px] sm:h-full sm:shrink-0' : 'w-full'
+        }`}
         style={{
-          width: viewMode === 'list' ? '200px' : '100%',
-          height: viewMode === 'list' ? '100%' : '18rem',
-          flexShrink: viewMode === 'list' ? 0 : undefined
+          height: viewMode === 'list' ? undefined : undefined
         }}
       >
-        <img 
+        <Image
           alt={event.alt} 
-          className="rounded-t-xl" 
+          className="rounded-t-xl object-cover"
+          width={600}
+          height={340}
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           style={{
-            objectFit: 'cover',
             width: '100%',
-            height: '100%',
+            height: viewMode === 'list' ? '100%' : 'auto',
+            aspectRatio: viewMode === 'list' ? undefined : '16 / 9',
             opacity: imageLoaded ? 1 : 0.5,
             filter: imageLoaded ? 'blur(0px)' : 'blur(8px)',
             transition: 'opacity 0.35s ease, filter 0.35s ease, transform 0.35s ease'
@@ -149,26 +165,26 @@ function EventCard({ event, query, index, viewMode }: { event: any; query: strin
         }} />
         <LikeButton />
       </div>
-      <div className="p-5 flex flex-col flex-1">
+      <div className="p-4 sm:p-5 flex flex-col flex-1 min-h-42.5 sm:min-h-47.5">
         <div className="mb-2" style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
           <span className={categoryPillClasses} style={{ whiteSpace: 'nowrap', flexShrink: 0 }}>
             <span>{event.category}</span>
           </span>
         </div>
-        <span className="text-xs text-on-surface-variant" style={{ whiteSpace: 'nowrap', fontSize: '12px' }}>
+        <span className="text-xs text-on-surface-variant block" style={{ whiteSpace: viewMode === 'list' ? 'nowrap' : 'normal', fontSize: '12px' }}>
           {eventTime ? `${eventDate} • ${eventTime}` : eventDate}
         </span>
-        <h3 className="text-lg font-bold text-on-surface mb-4 line-clamp-2 leading-tight">
+        <h3 className="text-base sm:text-lg font-bold text-on-surface mb-4 line-clamp-2 leading-tight">
           {highlightText(event.title, query)}
         </h3>
-        <div className="mt-auto flex items-center justify-between pt-4 border-t border-outline-variant/10">
-          <button className="inline-flex text-primary text-sm font-semibold hover:underline cursor-pointer transition-all duration-200 ease-in-out hover:text-indigo-600 hover:translate-x-1">View Details</button>
-          <button className="inline-flex p-2 rounded-lg hover:bg-surface-container-high transition-colors cursor-pointer transition-all duration-200 ease-in-out hover:text-indigo-600 hover:scale-125">
+        <div className="mt-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 pt-3 sm:pt-4 border-t border-outline-variant/10">
+          <button type="button" className="inline-flex text-primary text-sm font-semibold hover:underline cursor-pointer transition-all duration-200 ease-in-out hover:text-indigo-600 hover:translate-x-1 min-h-10 items-center">View Details</button>
+          <button type="button" aria-label="Share event" className="inline-flex p-2 rounded-lg hover:bg-surface-container-high cursor-pointer transition-all duration-200 ease-in-out hover:text-indigo-600 hover:scale-125 min-h-10 min-w-10 items-center justify-center self-start sm:self-auto">
             <span className="material-symbols-outlined text-on-surface-variant">share</span>
           </button>
         </div>
       </div>
-    </div>
+    </article>
   );
 }
 
@@ -215,18 +231,19 @@ export default function Page() {
   const [viewMode, setViewMode] = useState('grid');
   const [showTrending, setShowTrending] = useState(false);
   const [showUpcoming, setShowUpcoming] = useState(false);
+  const allEvents = events as Event[];
 
   useEffect(() => {
     if (process.env.NODE_ENV !== 'development') {
       return;
     }
 
-    events.forEach((event: any) => {
+    allEvents.forEach((event) => {
       if (!ALLOWED_CATEGORIES.includes(event.category)) {
         console.warn(`Invalid category detected for event: ${event.title}`);
       }
     });
-  }, []);
+  }, [allEvents]);
 
   const finalEvents = useMemo(() => {
     const normalizedSearchQuery = searchQuery.trim().toLowerCase();
@@ -251,7 +268,7 @@ export default function Page() {
       return parsedHour;
     };
 
-    let filteredEvents = events.filter((event: any) => {
+    let filteredEvents = allEvents.filter((event) => {
       const matchesSearch = (event.title || '').toLowerCase().includes(normalizedSearchQuery);
       const matchesCategory = activeCategory === 'All' || event.category === activeCategory;
 
@@ -283,48 +300,48 @@ export default function Page() {
     const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
 
     if (timeRange === 'Today') {
-      filteredEvents = filteredEvents.filter((event: any) => {
+      filteredEvents = filteredEvents.filter((event) => {
         const d = parseEventDate(event.datetime);
         return d >= startOfToday && d <= endOfToday;
       });
     } else if (timeRange === 'This Week') {
-      filteredEvents = filteredEvents.filter((event: any) => {
+      filteredEvents = filteredEvents.filter((event) => {
         const d = parseEventDate(event.datetime);
         return d >= startOfToday && d <= endOfWeek;
       });
     } else if (timeRange === 'This Month') {
-      filteredEvents = filteredEvents.filter((event: any) => {
+      filteredEvents = filteredEvents.filter((event) => {
         const d = parseEventDate(event.datetime);
         return d >= startOfToday && d <= endOfMonth;
       });
     }
 
     if (showUpcoming) {
-      filteredEvents = filteredEvents.filter((event: any) => parseEventDate(event.datetime) > startOfToday);
+      filteredEvents = filteredEvents.filter((event) => parseEventDate(event.datetime) > startOfToday);
     }
 
     if (showTrending) {
-      filteredEvents = filteredEvents.filter((_: any, index: number) => index % 3 === 0);
+      filteredEvents = filteredEvents.filter((_, index: number) => index % 3 === 0);
     }
 
     if (sortBy === 'A → Z') {
-      filteredEvents = [...filteredEvents].sort((a: any, b: any) => a.title.localeCompare(b.title));
+      filteredEvents = [...filteredEvents].sort((a, b) => a.title.localeCompare(b.title));
     } else if (sortBy === 'Z → A') {
-      filteredEvents = [...filteredEvents].sort((a: any, b: any) => b.title.localeCompare(a.title));
+      filteredEvents = [...filteredEvents].sort((a, b) => b.title.localeCompare(a.title));
     } else if (sortBy === 'Date: Earliest') {
       filteredEvents = [...filteredEvents].sort(
-        (a: any, b: any) =>
+        (a, b) =>
           parseEventDate(a.datetime).getTime() - parseEventDate(b.datetime).getTime()
       );
     } else if (sortBy === 'Date: Latest') {
       filteredEvents = [...filteredEvents].sort(
-        (a: any, b: any) =>
+        (a, b) =>
           parseEventDate(b.datetime).getTime() - parseEventDate(a.datetime).getTime()
       );
     }
 
     return filteredEvents;
-  }, [searchQuery, activeCategory, sortBy, timeRange, timeOfDay, eventType, showTrending, showUpcoming]);
+  }, [searchQuery, activeCategory, sortBy, timeRange, timeOfDay, eventType, showTrending, showUpcoming, allEvents]);
 
   const filteredEvents = finalEvents;
 
@@ -333,40 +350,43 @@ export default function Page() {
 <div style={{ animation: 'fadeIn 0.6s ease-in-out' }}>
 {/*  TopNavBar Component  */}
 <Navbar searchQuery={searchQuery} onSearchQueryChange={setSearchQuery} />
-<main className="pt-28 pb-16 w-full" style={{ maxWidth: '1600px', margin: '0 auto', padding: '0 32px', paddingTop: '7rem' }}>
+<main className="pt-24 sm:pt-28 pb-12 sm:pb-16 w-full max-w-400 mx-auto px-4 sm:px-6 lg:px-8 overflow-x-hidden">
 {/*  Hero Search Section  */}
 <section className="mb-12">
-<div style={{ width: '100%', padding: '16px 48px 0', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+<div className="w-full px-0 sm:px-2 lg:px-4 pt-2 sm:pt-4 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-start">
+<div className="flex flex-col gap-5 sm:gap-6">
   <span className="animate-fade-up delay-1 anim-fade-up d1" style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.12em', color: '#6b7280', textTransform: 'uppercase' }}>
     LIVE EVENTS PLATFORM
   </span>
 
-  <h1 className="animate-fade-up delay-2 anim-fade-up d2" style={{ fontSize: 'clamp(36px, 5vw, 64px)', fontWeight: 900, color: '#0f172a', lineHeight: 1.1, letterSpacing: '-2px', maxWidth: '700px', margin: 0 }}>
+  <h1 className="animate-fade-up delay-2 anim-fade-up d2 text-4xl sm:text-5xl lg:text-6xl" style={{ fontWeight: 900, color: '#0f172a', lineHeight: 1.1, letterSpacing: '-2px', maxWidth: '700px', margin: 0 }}>
     The platform where
     <br />
     developers level up.
   </h1>
 
-  <p className="animate-fade-up delay-3 anim-fade-up d3" style={{ fontSize: '16px', color: '#6b7280', maxWidth: '480px', margin: 0 }}>
+  <p className="animate-fade-up delay-3 anim-fade-up d3 text-sm sm:text-base" style={{ color: '#6b7280', maxWidth: '480px', margin: 0 }}>
     Live summits, workshops, and bootcamps from senior engineers — free to attend.
   </p>
+</div>
 
-  <div className="animate-scale-in delay-4 anim-scale-in d3" style={{ display: 'grid', gridTemplateColumns: '1.2fr 2fr 1.5fr 0.8fr', gap: '8px', width: '100%', height: '360px', marginTop: '8px', borderRadius: '16px', overflow: 'hidden' }}>
+  <div className="animate-scale-in delay-4 anim-scale-in d3 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 w-full h-auto lg:h-90 rounded-2xl overflow-hidden mt-1 lg:mt-2">
     <div className="mosaic-wrap">
-      <img src="https://images.unsplash.com/photo-1591115765373-5207764f72e7?w=400&h=400&fit=crop" className="mosaic-img" style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scale(1)', transition: 'transform 0.4s ease' }} alt="Tech conference audience" loading="lazy" />
+      <Image src="https://images.unsplash.com/photo-1591115765373-5207764f72e7?w=400&h=400&fit=crop" className="mosaic-img object-cover" width={400} height={400} sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw" style={{ width: '100%', height: '100%', transform: 'scale(1)', transition: 'transform 0.4s ease' }} alt="Tech conference audience" loading="lazy" />
     </div>
     <div className="mosaic-wrap">
-      <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&h=400&fit=crop" className="mosaic-img" style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scale(1)', transition: 'transform 0.4s ease' }} alt="Developers collaborating at office" loading="lazy" />
+      <Image src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&h=400&fit=crop" className="mosaic-img object-cover" width={800} height={400} sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw" style={{ width: '100%', height: '100%', transform: 'scale(1)', transition: 'transform 0.4s ease' }} alt="Developers collaborating at office" loading="lazy" />
     </div>
     <div className="mosaic-wrap">
-      <img src="https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=600&h=400&fit=crop" className="mosaic-img" style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scale(1)', transition: 'transform 0.4s ease' }} alt="Presenter on stage with screen" loading="lazy" />
+      <Image src="https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=600&h=400&fit=crop" className="mosaic-img object-cover" width={600} height={400} sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw" style={{ width: '100%', height: '100%', transform: 'scale(1)', transition: 'transform 0.4s ease' }} alt="Presenter on stage with screen" loading="lazy" />
     </div>
     <div className="mosaic-wrap">
-      <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&h=400&fit=crop" className="mosaic-img" style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scale(1)', transition: 'transform 0.4s ease' }} alt="Developer coding at night setup" loading="lazy" />
+      <Image src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&h=400&fit=crop" className="mosaic-img object-cover" width={400} height={400} sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw" style={{ width: '100%', height: '100%', transform: 'scale(1)', transition: 'transform 0.4s ease' }} alt="Developer coding at night setup" loading="lazy" />
     </div>
   </div>
+</div>
 
-  <div className="stats-row animate-fade-up delay-5 anim-fade-up d4" style={{ display: 'flex', justifyContent: 'center', gap: '16px', flexWrap: 'wrap', width: '100%', maxWidth: '760px', margin: '32px auto' }}>
+  <div className="stats-row animate-fade-up delay-5 anim-fade-up d4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full max-w-4xl mx-auto mt-8 sm:mt-10">
     {[
       ['16 Events', 'Across 8 categories'],
       ['3 Live Today', 'Join now free'],
@@ -378,18 +398,16 @@ export default function Page() {
       return (
       <div
         key={stat}
-        className="stats-card stat-card"
+        className="stats-card stat-card w-full"
         style={{
           backgroundColor: '#ffffff',
           border: '1.5px solid #e5e7eb',
           borderRadius: '16px',
-          padding: '24px 32px',
+          padding: '18px 20px',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           gap: '4px',
-          flex: 1,
-          minWidth: '160px',
           boxShadow: '0 2px 12px rgba(0,0,0,0.05)',
           transition: 'transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease'
         }}
@@ -401,15 +419,14 @@ export default function Page() {
       );
     })}
   </div>
-</div>
 
-<div className="mt-8" style={{ padding: '0 48px' }}>
+<div className="mt-8 px-0 sm:px-2 lg:px-4">
 <div style={{ textAlign: 'center' }}>
   <h2 className="text-xl font-semibold text-gray-900">Explore Events</h2>
   <p className="text-gray-600 mt-2 max-w-xl mx-auto font-normal" style={{ lineHeight: 1.75 }}>Find technical events across cloud, AI, DevOps, and emerging technologies.</p>
 </div>
-<div className="animate-fade-up delay-3 mt-5 anim-fade-up d2" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
-  <div className="flex flex-wrap justify-center gap-3" style={{ flex: 1 }}>
+<div className="animate-fade-up delay-3 mt-5 anim-fade-up d2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+  <div className="category-scroll flex sm:flex-wrap justify-start sm:justify-center gap-3 overflow-x-auto sm:overflow-visible whitespace-nowrap sm:whitespace-normal pb-1 sm:pb-0" style={{ flex: 1 }}>
     {['All', 'Development', 'DevOps', 'AI/ML', 'Cloud', 'Cybersecurity', 'Mobile', 'Web3', 'Backend', 'Design'].map(cat => (
       <button key={cat} onClick={() => setActiveCategory(cat)} style={{
         padding: '7px 18px', borderRadius: '99px', fontSize: '13px', fontWeight: 500,
@@ -417,12 +434,12 @@ export default function Page() {
         backgroundColor: activeCategory === cat ? '#4f46e5' : 'transparent',
         borderColor: activeCategory === cat ? '#4f46e5' : '#d1d5db',
         color: activeCategory === cat ? '#ffffff' : '#374151'
-      }} className="interactive-btn">{cat}</button>
+      }} className="interactive-btn" type="button" aria-pressed={activeCategory === cat}>{cat}</button>
     ))}
   </div>
 
-  <div className="mt-0 text-center" style={{ marginLeft: 'auto' }}>
-  <button onClick={() => setShowFilters(!showFilters)} className="interactive-btn animate-fade-up delay-4 anim-fade-up d3" style={{
+  <div className="mt-0 text-right sm:ml-auto w-full sm:w-auto">
+  <button type="button" onClick={() => setShowFilters(!showFilters)} className="interactive-btn animate-fade-up delay-4 anim-fade-up d3" style={{
     backgroundColor: showFilters ? '#4f46e5' : '#ffffff',
     border: '1.5px solid #4f46e5',
     color: showFilters ? '#ffffff' : '#4f46e5',
@@ -442,13 +459,13 @@ export default function Page() {
       <line x1="8" y1="12" x2="16" y2="12"/>
       <line x1="11" y1="18" x2="13" y2="18"/>
     </svg>
-    {showFilters ? 'Hide Filters' : 'Advanced Filters'}
+    <span className="hidden sm:inline">{showFilters ? 'Hide Filters' : 'Advanced Filters'}</span>
   </button>
   </div>
 </div>
 
 {showFilters && (
-  <div style={{
+  <div className="w-full overflow-hidden" style={{
     marginTop: '16px', padding: '20px 24px',
     backgroundColor: '#ffffff', borderRadius: '16px',
     boxShadow: '0 4px 24px rgba(0,0,0,0.07)',
@@ -460,7 +477,7 @@ export default function Page() {
     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
       <span style={{ fontSize: '12px', fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.08em', minWidth: '90px' }}>Sort By</span>
       {['Default', 'A → Z', 'Z → A', 'Date: Earliest', 'Date: Latest'].map(opt => (
-        <button key={opt} onClick={() => setSortBy(opt)} style={{
+        <button key={opt} type="button" onClick={() => setSortBy(opt)} style={{
           padding: '6px 14px', borderRadius: '99px', fontSize: '13px', fontWeight: 500, cursor: 'pointer',
           border: '1.5px solid', transition: 'all 0.2s ease',
           backgroundColor: sortBy === opt ? '#4f46e5' : 'transparent',
@@ -474,7 +491,7 @@ export default function Page() {
     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
       <span style={{ fontSize: '12px', fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.08em', minWidth: '90px' }}>Time Range</span>
       {['Any Time', 'Today', 'This Week', 'This Month'].map(opt => (
-        <button key={opt} onClick={() => setTimeRange(opt)} style={{
+        <button key={opt} type="button" onClick={() => setTimeRange(opt)} style={{
           padding: '6px 14px', borderRadius: '99px', fontSize: '13px', fontWeight: 500, cursor: 'pointer',
           border: '1.5px solid', transition: 'all 0.2s ease',
           backgroundColor: timeRange === opt ? '#4f46e5' : 'transparent',
@@ -488,7 +505,7 @@ export default function Page() {
     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
       <span style={{ fontSize: '12px', fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.08em', minWidth: '90px' }}>Time of Day</span>
       {['Any', 'Morning', 'Afternoon', 'Evening'].map(opt => (
-        <button key={opt} onClick={() => setTimeOfDay(opt)} style={{
+        <button key={opt} type="button" onClick={() => setTimeOfDay(opt)} style={{
           padding: '6px 14px', borderRadius: '99px', fontSize: '13px', fontWeight: 500, cursor: 'pointer',
           border: '1.5px solid', transition: 'all 0.2s ease',
           backgroundColor: timeOfDay === opt ? '#4f46e5' : 'transparent',
@@ -502,7 +519,7 @@ export default function Page() {
     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
       <span style={{ fontSize: '12px', fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.08em', minWidth: '90px' }}>Event Type</span>
       {['All Types', 'Summit', 'Workshop', 'Conference', 'Bootcamp', 'Expo'].map(opt => (
-        <button key={opt} onClick={() => setEventType(opt)} style={{
+        <button key={opt} type="button" onClick={() => setEventType(opt)} style={{
           padding: '6px 14px', borderRadius: '99px', fontSize: '13px', fontWeight: 500, cursor: 'pointer',
           border: '1.5px solid', transition: 'all 0.2s ease',
           backgroundColor: eventType === opt ? '#4f46e5' : 'transparent',
@@ -515,21 +532,21 @@ export default function Page() {
     {/* Row 5 - Toggles */}
     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
       <span style={{ fontSize: '12px', fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.08em', minWidth: '90px' }}>Quick</span>
-      <button onClick={() => setShowTrending(!showTrending)} style={{
+      <button type="button" onClick={() => setShowTrending(!showTrending)} style={{
         padding: '6px 14px', borderRadius: '99px', fontSize: '13px', fontWeight: 500, cursor: 'pointer',
         border: '1.5px solid', transition: 'all 0.2s ease',
         backgroundColor: showTrending ? '#4f46e5' : 'transparent',
         borderColor: showTrending ? '#4f46e5' : '#d1d5db',
         color: showTrending ? '#ffffff' : '#374151'
       }} className="interactive-btn">🔥 Trending</button>
-      <button onClick={() => setShowUpcoming(!showUpcoming)} style={{
+      <button type="button" onClick={() => setShowUpcoming(!showUpcoming)} style={{
         padding: '6px 14px', borderRadius: '99px', fontSize: '13px', fontWeight: 500, cursor: 'pointer',
         border: '1.5px solid', transition: 'all 0.2s ease',
         backgroundColor: showUpcoming ? '#4f46e5' : 'transparent',
         borderColor: showUpcoming ? '#4f46e5' : '#d1d5db',
         color: showUpcoming ? '#ffffff' : '#374151'
       }} className="interactive-btn">📅 Upcoming Only</button>
-      <button onClick={() => {
+      <button type="button" onClick={() => {
         setSortBy('Default'); setTimeRange('Any Time');
         setTimeOfDay('Any'); setEventType('All Types');
         setShowTrending(false); setShowUpcoming(false); setActiveCategory('All');
@@ -544,11 +561,12 @@ export default function Page() {
 </div>
 </section>
 
-<div className="flex justify-between items-center" style={{ marginTop: '8px' }}>
+<div className="mt-2 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
   <p className="text-sm text-gray-500">{filteredEvents.length} events found</p>
 
   <div style={{ display: 'flex', alignItems: 'center', gap: '4px', backgroundColor: '#f1f5f9', borderRadius: '10px', padding: '4px' }}>
     <button
+      type="button"
       onClick={() => setViewMode('grid')}
       style={{
         padding: '7px 14px', borderRadius: '8px', border: 'none', cursor: 'pointer',
@@ -566,6 +584,7 @@ export default function Page() {
       Grid
     </button>
     <button
+      type="button"
       onClick={() => setViewMode('list')}
       style={{
         padding: '7px 14px', borderRadius: '8px', border: 'none', cursor: 'pointer',
@@ -595,17 +614,12 @@ export default function Page() {
 ) : (
   <>
     <div
-      className="event-grid"
-      style={{
-        display: 'grid',
-        gridTemplateColumns: viewMode === 'grid' ? 'repeat(4, 1fr)' : '1fr',
-        gap: '28px',
-        marginTop: '16px',
-        width: '100%'
-      }}
+      className={`event-grid mt-4 w-full grid gap-5 sm:gap-6 lg:gap-7 ${
+        viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1'
+      }`}
     >
-      {finalEvents.map((event: any, index: number) => (
-        <EventCard key={event.id} event={event} query={searchQuery} index={index} viewMode={viewMode} />
+      {finalEvents.map((event) => (
+        <EventCard key={event.id} event={event} query={searchQuery} viewMode={viewMode} />
       ))}
     </div>
   </>
@@ -647,6 +661,15 @@ export default function Page() {
 
   .mosaic-wrap { overflow: hidden; }
 
+  .category-scroll {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .category-scroll::-webkit-scrollbar {
+    display: none;
+  }
+
   .stat-card:hover {
     transform: translateY(-4px);
     box-shadow: 0 8px 24px rgba(0,0,0,0.1);
@@ -685,13 +708,14 @@ export default function Page() {
     }
   }
 
-  @media (max-width: 1024px) {
-    .event-grid { grid-template-columns: repeat(2, 1fr) !important; }
-  }
-
   @media (max-width: 640px) {
-    .event-grid { grid-template-columns: repeat(1, 1fr) !important; }
-    .stats-card { min-width: 140px !important; }
+    .mosaic-wrap {
+      min-height: 110px;
+    }
+
+    .stats-card {
+      padding: 16px 14px !important;
+    }
   }
 `}</style>
     </>

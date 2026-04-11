@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import EventPage from '../../../components/event/EventPage';
 import { events } from '../../../data/events';
+import type { Event } from '../../../types/event';
 
 type EventPageProps = {
   params: Promise<{
@@ -11,7 +12,7 @@ type EventPageProps = {
 export async function generateMetadata({ params }: EventPageProps): Promise<Metadata> {
   const { id } = await params;
   const parsedId = parseInt(id, 10);
-  const matchedEvent = events.find((e: any) => e.id === parsedId);
+  const matchedEvent = (events as Event[]).find((e) => e.id === parsedId);
 
   if (!matchedEvent) {
     return {
@@ -21,7 +22,7 @@ export async function generateMetadata({ params }: EventPageProps): Promise<Meta
   }
 
   const title = `${matchedEvent.title} — VickyBytes`;
-  const eventDescription = (matchedEvent as any).description;
+  const eventDescription = matchedEvent.description;
   const description =
     typeof eventDescription === 'string'
       ? eventDescription
