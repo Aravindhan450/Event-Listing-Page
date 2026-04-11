@@ -57,53 +57,39 @@ export default function EventDetailPage() {
 
   return (
     <div className="event-page min-h-screen bg-background text-on-background">
-      <nav className="sticky top-0 z-40 border-b border-outline-variant/30 bg-surface/90 backdrop-blur-md">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-4">
-          <div className="text-lg font-bold text-on-surface">The Kinetic Curator</div>
+      <nav className="bg-surface/70 backdrop-blur-md nav-grid-layout" style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', width: '100%', padding: '16px 24px', position: 'sticky', top: 0, zIndex: 1000, backdropFilter: 'blur(12px)', backgroundColor: 'rgba(255, 255, 255, 0.85)', borderBottom: '1px solid #e5e7eb', boxSizing: 'border-box' }}>
+        <div style={{ justifySelf: 'start' }}>
+          <span style={{ fontWeight: 700, fontSize: '18px', whiteSpace: 'nowrap' }} className="text-indigo-900 tracking-tight">VickyBytes</span>
+        </div>
 
-          <div className="hidden items-center gap-8 lg:flex">
-            <a
-              href="#"
-              className="text-sm font-medium text-primary underline decoration-2 decoration-primary underline-offset-8"
-            >
-              Streaming Guide
-            </a>
-            <a
-              href="#"
-              className="text-sm font-medium text-on-surface-variant hover:text-on-surface hover:underline hover:decoration-2 hover:decoration-primary hover:underline-offset-8"
-            >
-              Browse Events
-            </a>
-            <a
-              href="#"
-              className="text-sm font-medium text-on-surface-variant hover:text-on-surface hover:underline hover:decoration-2 hover:decoration-primary hover:underline-offset-8"
-            >
-              Technical Support
-            </a>
-          </div>
-
-          <div className="flex items-center gap-3">
+        <div style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: '480px' }}>
+          <div style={{
+            display: 'flex', alignItems: 'center',
+            backgroundColor: '#ffffff', borderRadius: '99px',
+            padding: '12px 16px 12px 20px',
+            border: '1px solid rgba(15, 23, 42, 0.18)',
+            boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
+            gap: '12px', width: '100%'
+          }}>
+            <svg width="18" height="18" fill="none" stroke="#6b7280" strokeWidth="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
             <input
-              type="text"
-              placeholder="Search events..."
-              className="hidden w-40 rounded-full bg-surface-container-low px-4 py-2 text-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:ring-2 focus:ring-primary lg:block"
+              placeholder="Search frameworks, summits, or workshops..."
+              style={{ flex: 1, border: 'none', outline: 'none', fontSize: '15px', color: '#111827', background: 'transparent' }}
             />
-            <button
-              type="button"
-              aria-label="Log out"
-              className="group cursor-pointer p-2 rounded-full hover:bg-surface-container-low hover:ring-2 hover:ring-primary/40 hover:-translate-y-0.5 transition-all active:scale-90 duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-            >
-              <span className="material-symbols-outlined text-on-surface-variant transition-colors group-hover:text-primary">logout</span>
-            </button>
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-sm font-semibold text-on-primary">
-              AK
-            </div>
           </div>
+        </div>
+
+        <div style={{ gridColumn: '3', justifySelf: 'end', display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <button className="p-2 rounded-full hover:bg-slate-100/50 transition-all active:scale-90 duration-200">
+            <span className="material-symbols-outlined text-slate-600">notifications</span>
+          </button>
+          <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#4f46e5', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>AK</div>
         </div>
       </nav>
 
-      <main className="mx-auto grid max-w-7xl grid-cols-1 gap-6 p-6 lg:grid-cols-[1fr_340px]">
-        <section className="space-y-6 lg:col-start-1">
+      <div className="max-w-7xl mx-auto px-6 py-6">
+        <main className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+          <section className="space-y-6 lg:col-span-2 w-full">
             <VideoPlayer
               videoUrl={event.videoUrl}
               thumbnail={event.image}
@@ -112,81 +98,19 @@ export default function EventDetailPage() {
               time={event.time}
               title={event.title}
               speaker={event.speaker}
+              viewerCount={event.viewerCount}
+              description={event.description}
+              tags={event.tags}
             />
-        </section>
+          </section>
 
-        <div className="self-start lg:col-start-2 lg:row-start-1 lg:h-[600px]">
-          <div className="lg:fixed lg:top-[72px] lg:w-[340px] lg:right-[max(1.5rem,calc((100vw-80rem)/2+1.5rem))]">
+          <div className="lg:col-span-1 w-full h-full lg:h-[520px]">
             <LiveChat viewerCount={event.viewerCount} />
           </div>
-        </div>
 
-        <section className="border-t mt-8 pt-6 lg:col-start-1 lg:mt-0">
-          <p className="text-xs font-semibold tracking-widest text-on-surface-variant">ABOUT THIS EVENT</p>
-          <div className="mt-4">
-            {event.description.map((paragraph, index) => (
-              <p
-                key={paragraph}
-                className={`text-base leading-relaxed text-on-surface-variant ${
-                  index < event.description.length - 1 ? 'mb-4' : ''
-                }`}
-              >
-                {paragraph}
-              </p>
-            ))}
-          </div>
-          <div className="mt-6 flex flex-wrap gap-2">
-            {event.tags.map((tag) => (
-              <span
-                key={tag}
-                className="cursor-pointer rounded-full border border-outline-variant/40 px-3 py-1 text-sm text-on-surface-variant transition-colors hover:bg-surface-container-low"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-        </section>
-      </main>
+        </main>
+      </div>
 
-      <footer className="border-t border-outline-variant/30 bg-surface-container-low">
-        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-6 py-12 md:grid-cols-4">
-          <div>
-            <h3 className="text-lg font-bold text-on-surface">The Kinetic Curator</h3>
-            <p className="mt-3 text-sm text-on-surface-variant">
-              Curating the world&#39;s most trusted technical broadcasts, expert sessions, and engineering conversations.
-            </p>
-          </div>
-
-          <div>
-            <h4 className="text-sm font-semibold uppercase tracking-wide text-on-surface">Platform</h4>
-            <ul className="mt-3 space-y-2 text-sm text-on-surface-variant">
-              <li><a href="#" className="hover:text-primary">Browse Events</a></li>
-              <li><a href="#" className="hover:text-primary">Streaming Guide</a></li>
-              <li><a href="#" className="hover:text-primary">Technical Support</a></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="text-sm font-semibold uppercase tracking-wide text-on-surface">Legal</h4>
-            <ul className="mt-3 space-y-2 text-sm text-on-surface-variant">
-              <li><a href="#" className="hover:text-primary">Privacy Policy</a></li>
-              <li><a href="#" className="hover:text-primary">Terms of Use</a></li>
-              <li><a href="#" className="hover:text-primary">Code of Conduct</a></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="text-sm font-semibold uppercase tracking-wide text-on-surface">Connect</h4>
-            <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-outline-variant/40 bg-surface-container-lowest px-3 py-2 text-sm text-on-surface-variant">
-              <span className="material-symbols-outlined text-base">share</span>
-              Share
-            </div>
-          </div>
-        </div>
-        <div className="border-t border-outline-variant/30 px-6 py-4 text-center text-xs font-semibold tracking-wide text-on-surface-variant">
-          © 2024 THE KINETIC CURATOR. ALL RIGHTS RESERVED.
-        </div>
-      </footer>
     </div>
   );
 }

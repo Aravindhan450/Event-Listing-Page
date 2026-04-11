@@ -16,6 +16,9 @@ type VideoPlayerProps = {
   time: string;
   title: string;
   speaker: Speaker;
+  viewerCount: number;
+  description: string[];
+  tags: string[];
 };
 
 export default function VideoPlayer({
@@ -26,10 +29,14 @@ export default function VideoPlayer({
   time,
   title,
   speaker,
+  viewerCount,
+  description,
+  tags,
 }: VideoPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [liked, setLiked] = useState(false);
   const [heartAnimating, setHeartAnimating] = useState(false);
+  const likeCount = 128;
 
   const handleLikeToggle = () => {
     setLiked((prev) => !prev);
@@ -39,12 +46,11 @@ export default function VideoPlayer({
 
   return (
     <div>
-      <div className="relative aspect-video overflow-hidden rounded-xl bg-inverse-surface">
+      <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-inverse-surface">
         {isPlaying ? (
           <iframe
             src={`${videoUrl}?autoplay=1&rel=0&modestbranding=1`}
-            width="100%"
-            height="100%"
+            className="w-full h-full"
             frameBorder="0"
             allowFullScreen
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -76,66 +82,129 @@ export default function VideoPlayer({
           </span>
         </div>
 
-        <div className="absolute right-3 top-3">
+      </div>
+
+      <div className="mt-6" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px' }}>
+        <h1 style={{ fontSize: '20px', fontWeight: 700, color: '#0f172a', margin: 0 }}>{title}</h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <button
             type="button"
-            aria-label="Share"
-            className="rounded-full bg-black/40 p-2 transition-colors hover:bg-black/60"
+            aria-label="Like event"
+            onClick={handleLikeToggle}
+            style={{
+              border: '1px solid #e5e7eb',
+              borderRadius: '999px',
+              padding: '8px 14px',
+              backgroundColor: '#ffffff',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              cursor: 'pointer'
+            }}
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path
-                d="M18 8C19.6569 8 21 6.65685 21 5C21 3.34315 19.6569 2 18 2C16.3431 2 15 3.34315 15 5C15 5.25931 15.0329 5.51094 15.0948 5.75088L8.90961 9.22054C8.36434 8.47213 7.48038 8 6.5 8C4.84315 8 3.5 9.34315 3.5 11C3.5 12.6569 4.84315 14 6.5 14C7.48047 14 8.3645 13.5278 8.90976 12.7793L15.095 16.2491C15.033 16.4891 15 16.7407 15 17C15 18.6569 16.3431 20 18 20C19.6569 20 21 18.6569 21 17C21 15.3431 19.6569 14 18 14C17.0195 14 16.1355 14.4722 15.5902 15.2207L9.40498 11.7509C9.46695 11.5109 9.5 11.2593 9.5 11C9.5 10.7407 9.46695 10.4891 9.40498 10.2491L15.5902 6.77934C16.1355 7.52781 17.0195 8 18 8Z"
-                fill="white"
-              />
-            </svg>
+            <span
+              className={`material-symbols-outlined inline-block transition-transform duration-150 ${
+                heartAnimating ? 'scale-[1.2]' : 'scale-100'
+              } ${liked ? 'text-[#ef4444]' : 'text-on-surface-variant'}`}
+              style={{ fontVariationSettings: liked ? "'FILL' 1" : "'FILL' 0", fontSize: '18px' }}
+            >
+              favorite
+            </span>
+            <span style={{ fontSize: '13px', color: '#374151', fontWeight: 600 }}>{likeCount}</span>
+          </button>
+          <button
+            type="button"
+            style={{
+              border: '1px solid #e5e7eb',
+              borderRadius: '999px',
+              padding: '8px 14px',
+              backgroundColor: '#ffffff',
+              fontSize: '13px',
+              fontWeight: 600,
+              color: '#374151',
+              cursor: 'pointer'
+            }}
+          >
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              Share
+              <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>share</span>
+            </span>
           </button>
         </div>
       </div>
 
-      <div className="mt-4 flex items-center gap-3">
+      <div style={{ marginTop: '10px', display: 'flex', alignItems: 'center', gap: '12px', fontSize: '13px', color: '#6b7280', flexWrap: 'wrap' }}>
         <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
           {category}
         </span>
-        <span className="text-sm text-on-surface-variant">
-          {date} • {time}
-        </span>
+        <span>{time ? `${date} • ${time}` : date}</span>
+        <span style={{ color: '#9ca3af' }}>•</span>
+        <span>{(viewerCount / 1000).toFixed(1)}K watching</span>
       </div>
 
-      <h1 className="mt-3 text-3xl font-bold text-on-surface">{title}</h1>
+      <div style={{ height: '1px', backgroundColor: '#e5e7eb', width: '100%', margin: '16px 0' }} />
 
-      <div className="mt-4 flex items-center gap-3">
-        <button
-          type="button"
-          className="rounded-lg bg-primary px-5 py-2 text-on-primary transition-all hover:opacity-90 active:scale-[0.98]"
-        >
-          Register Now
-        </button>
-        <button
-          type="button"
-          aria-label="Like event"
-          onClick={handleLikeToggle}
-          className="rounded-lg border border-outline-variant/40 px-3 py-2 transition-colors hover:bg-surface-container-low"
-        >
-          <span
-            className={`material-symbols-outlined inline-block transition-transform duration-150 ${
-              heartAnimating ? 'scale-[1.2]' : 'scale-100'
-            } ${liked ? 'text-[#ef4444]' : 'text-on-surface-variant'}`}
-            style={{ fontVariationSettings: liked ? "'FILL' 1" : "'FILL' 0" }}
-          >
-            favorite
-          </span>
-        </button>
-      </div>
-
-      <div className="mt-5 flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-sm font-semibold text-on-primary">
-          {speaker.avatarInitials}
+      <div className="mt-4" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-sm font-semibold text-on-primary">
+            {speaker.avatarInitials}
+          </div>
+          <div>
+            <p style={{ fontWeight: 600, color: '#0f172a', margin: 0 }}>{speaker.name}</p>
+            <p style={{ fontSize: '13px', color: '#6b7280', margin: '2px 0 0' }}>{speaker.role}</p>
+          </div>
         </div>
+        <button
+          type="button"
+          style={{
+            backgroundColor: '#0f172a',
+            color: '#ffffff',
+            borderRadius: '99px',
+            padding: '8px 20px',
+            border: 'none',
+            cursor: 'pointer',
+            fontWeight: 600
+          }}
+        >
+          Subscribe
+        </button>
+      </div>
+
+      <div style={{ height: '1px', backgroundColor: '#e5e7eb', width: '100%', margin: '16px 0' }} />
+
+      <section className="bg-white border border-gray-200 rounded-xl p-6 mt-6 shadow-sm lg:col-span-2">
+        <p className="text-xs font-semibold tracking-wider uppercase text-gray-400 mb-3">
+          ABOUT THIS EVENT
+        </p>
         <div>
-          <p className="font-semibold text-on-surface">{speaker.name}</p>
-          <p className="text-sm text-on-surface-variant">{speaker.role}</p>
+          {Array.isArray(description)
+            ? description.map((paragraph, index) => (
+                <p
+                  key={index}
+                  className={`text-sm text-gray-700 leading-relaxed ${index < description.length - 1 ? 'mb-3' : ''}`}
+                >
+                  {paragraph}
+                </p>
+              ))
+            : typeof description === 'string'
+              ? (
+                <p className="text-sm text-gray-700 leading-relaxed mb-3">
+                  {description}
+                </p>
+                )
+              : null}
         </div>
-      </div>
+        <div className="mt-2">
+          {tags.map((tag) => (
+            <span
+              key={tag}
+              className="inline-block bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs mr-2"
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+      </section>
 
       <style jsx>{`
         @keyframes statusPulse {

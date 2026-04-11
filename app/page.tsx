@@ -154,7 +154,9 @@ function EventCard({ event, query, index, viewMode }: { event: any; query: strin
             <span>{event.category}</span>
           </span>
         </div>
-        <span className="text-xs text-on-surface-variant" style={{ whiteSpace: 'nowrap', fontSize: '12px' }}>{eventDate} • {eventTime}</span>
+        <span className="text-xs text-on-surface-variant" style={{ whiteSpace: 'nowrap', fontSize: '12px' }}>
+          {eventTime ? `${eventDate} • ${eventTime}` : eventDate}
+        </span>
         <h3 className="text-lg font-bold text-on-surface mb-4 line-clamp-2 leading-tight">
           {highlightText(event.title, query)}
         </h3>
@@ -204,6 +206,8 @@ function EmptyState({
 export default function Page() {
   const [loading, setLoading] = useState(true);
   const [isLoaderFading, setIsLoaderFading] = useState(false);
+  const [typedText, setTypedText] = useState('');
+  const fullText = '> loading events...';
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
   const [showFilters, setShowFilters] = useState(false);
@@ -223,6 +227,21 @@ export default function Page() {
       clearTimeout(hideTimer);
     };
   }, []);
+
+  useEffect(() => {
+    if (!loading) return;
+    let i = 0;
+    setTypedText('');
+    const interval = setInterval(() => {
+      if (i < fullText.length) {
+        setTypedText(fullText.slice(0, i + 1));
+        i++;
+      } else {
+        clearInterval(interval);
+      }
+    }, 80);
+    return () => clearInterval(interval);
+  }, [loading]);
 
   useEffect(() => {
     if (process.env.NODE_ENV !== 'development') {
@@ -340,37 +359,31 @@ export default function Page() {
     return (
       <div style={{
         position: 'fixed', inset: 0,
-        backgroundColor: '#0f0f1a',
-        display: 'flex', flexDirection: 'column',
-        alignItems: 'center', justifyContent: 'center',
-        zIndex: 9999,
-        opacity: isLoaderFading ? 0 : 1,
-        transition: 'opacity 0.4s ease'
+        backgroundColor: '#0a0a0f',
+        display: 'flex', alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 9999
       }}>
-        <h1 style={{ color: '#ffffff', fontSize: '28px', fontWeight: 700, marginBottom: '12px', letterSpacing: '-0.5px' }}>
-          The Kinetic Curator
-        </h1>
-        <p style={{ color: '#6b7280', fontSize: '14px', marginBottom: '40px' }}>
-          Curated engineering experiences
-        </p>
         <div style={{
-          width: '180px', height: '3px',
-          backgroundColor: '#1f1f2e',
-          borderRadius: '99px', overflow: 'hidden'
+          fontFamily: "'Courier New', Courier, monospace",
+          fontSize: '18px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '4px'
         }}>
-          <div style={{
-            height: '100%',
-            width: '40%',
+          <span style={{ color: '#ffffff' }}>{typedText}</span>
+          <span style={{
+            width: '10px', height: '18px',
             backgroundColor: '#4f46e5',
-            borderRadius: '99px',
-            animation: 'slide 1.4s ease-in-out infinite'
+            display: 'inline-block',
+            animation: 'blink 0.8s step-end infinite'
           }} />
         </div>
+
         <style>{`
-          @keyframes slide {
-            0% { transform: translateX(-100%) scaleX(0.5); }
-            50% { transform: translateX(150%) scaleX(1.2); }
-            100% { transform: translateX(400%) scaleX(0.5); }
+          @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
           }
         `}</style>
       </div>
