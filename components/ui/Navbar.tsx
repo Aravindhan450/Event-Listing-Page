@@ -88,9 +88,9 @@ export default function Navbar({
           <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#4f46e5', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>AK</div>
           {showProfile && (
             <div style={{
-              position: 'absolute',
-              top: '48px',
-              right: 0,
+              position: 'fixed',
+              top: '72px',
+              right: '24px',
               width: '280px',
               backgroundColor: '#ffffff',
               borderRadius: '16px',

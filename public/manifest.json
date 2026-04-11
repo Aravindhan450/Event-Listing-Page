@@ -1,0 +1,16 @@
+{
+  "name": "VickyBytes — Live Tech Events Platform",
+  "short_name": "VickyBytes",
+  "description": "Discover and join live summits, workshops, and bootcamps from senior engineers. Free to attend.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4f46e5",
+  "icons": [
+    {
+      "src": "/next.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

@@ -15,6 +15,7 @@ type VideoPlayerProps = {
   category: string;
   date: string;
   time: string;
+  eventType: string;
   title: string;
   speaker: Speaker;
   viewerCount: number;
@@ -28,6 +29,7 @@ export default function VideoPlayer({
   category,
   date,
   time,
+  eventType,
   title,
   speaker,
   viewerCount,
@@ -79,6 +81,7 @@ export default function VideoPlayer({
         category={category}
         date={date}
         time={time}
+        eventType={eventType}
         title={title}
         speaker={speaker}
         viewerCount={viewerCount}

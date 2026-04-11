@@ -205,10 +205,6 @@ function EmptyState({
 }
 
 export default function Page() {
-  const [loading, setLoading] = useState(true);
-  const [isLoaderFading, setIsLoaderFading] = useState(false);
-  const [typedText, setTypedText] = useState('');
-  const fullText = '> loading events...';
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
   const [showFilters, setShowFilters] = useState(false);
@@ -219,30 +215,6 @@ export default function Page() {
   const [viewMode, setViewMode] = useState('grid');
   const [showTrending, setShowTrending] = useState(false);
   const [showUpcoming, setShowUpcoming] = useState(false);
-
-  useEffect(() => {
-    const fadeTimer = setTimeout(() => setIsLoaderFading(true), 1800);
-    const hideTimer = setTimeout(() => setLoading(false), 2200);
-    return () => {
-      clearTimeout(fadeTimer);
-      clearTimeout(hideTimer);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!loading) return;
-    let i = 0;
-    setTypedText('');
-    const interval = setInterval(() => {
-      if (i < fullText.length) {
-        setTypedText(fullText.slice(0, i + 1));
-        i++;
-      } else {
-        clearInterval(interval);
-      }
-    }, 80);
-    return () => clearInterval(interval);
-  }, [loading]);
 
   useEffect(() => {
     if (process.env.NODE_ENV !== 'development') {
@@ -355,41 +327,6 @@ export default function Page() {
   }, [searchQuery, activeCategory, sortBy, timeRange, timeOfDay, eventType, showTrending, showUpcoming]);
 
   const filteredEvents = finalEvents;
-
-  if (loading) {
-    return (
-      <div style={{
-        position: 'fixed', inset: 0,
-        backgroundColor: '#0a0a0f',
-        display: 'flex', alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 9999
-      }}>
-        <div style={{
-          fontFamily: "'Courier New', Courier, monospace",
-          fontSize: '18px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '4px'
-        }}>
-          <span style={{ color: '#ffffff' }}>{typedText}</span>
-          <span style={{
-            width: '10px', height: '18px',
-            backgroundColor: '#4f46e5',
-            display: 'inline-block',
-            animation: 'blink 0.8s step-end infinite'
-          }} />
-        </div>
-
-        <style>{`
-          @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0; }
-          }
-        `}</style>
-      </div>
-    );
-  }
 
   return (
     <>

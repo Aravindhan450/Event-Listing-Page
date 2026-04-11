@@ -13,6 +13,7 @@ type EventInfoProps = {
   category: string;
   date: string;
   time: string;
+  eventType: string;
   title: string;
   speaker: Speaker;
   viewerCount: number;
@@ -24,6 +25,7 @@ export default function EventInfo({
   category,
   date,
   time,
+  eventType,
   title,
   speaker,
   viewerCount,
@@ -37,6 +39,7 @@ export default function EventInfo({
   const [subscribePop, setSubscribePop] = useState(false);
   const [showUnsubConfirm, setShowUnsubConfirm] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const handleLikeToggle = () => {
     setLikeCount((count) => (liked ? count - 1 : count + 1));
@@ -230,29 +233,108 @@ export default function EventInfo({
 
       <div style={{ height: '1px', backgroundColor: '#e5e7eb', width: '100%', margin: '16px 0' }} />
 
-      <section className="bg-white border border-gray-200 rounded-xl p-6 mt-6 shadow-sm lg:col-span-2">
-        <p className="text-xs font-semibold tracking-wider uppercase text-gray-400 mb-3">
+      <section
+        style={{
+          backgroundColor: '#ffffff',
+          borderRadius: '16px',
+          border: '1px solid #e5e7eb',
+          padding: '24px',
+          marginTop: '16px'
+        }}
+      >
+        <div
+          className="event-key-details-grid"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, 1fr)',
+            gap: '16px',
+            marginBottom: '20px',
+            paddingBottom: '20px',
+            borderBottom: '1px solid #f1f5f9'
+          }}
+        >
+          {[
+            { label: 'Category', value: category },
+            { label: 'Date', value: date },
+            { label: 'Time', value: time },
+            { label: 'Type', value: eventType },
+          ].map((item) => (
+            <div
+              key={item.label}
+              style={{
+                backgroundColor: '#f8fafc',
+                borderRadius: '12px',
+                padding: '12px 16px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '4px'
+              }}
+            >
+              <span
+                style={{
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  color: '#9ca3af',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.08em'
+                }}
+              >
+                {item.label}
+              </span>
+              <span style={{ fontSize: '14px', fontWeight: 600, color: '#0f172a' }}>{item.value}</span>
+            </div>
+          ))}
+        </div>
+
+        <p
+          style={{
+            fontSize: '11px',
+            fontWeight: 700,
+            color: '#9ca3af',
+            textTransform: 'uppercase',
+            letterSpacing: '0.1em',
+            marginBottom: '12px'
+          }}
+        >
           ABOUT THIS EVENT
         </p>
-        <div>
-          {Array.isArray(description)
-            ? description.map((paragraph, index) => (
-                <p
-                  key={index}
-                  className={`text-sm text-gray-700 leading-relaxed ${index < description.length - 1 ? 'mb-3' : ''}`}
-                >
-                  {paragraph}
-                </p>
-              ))
-            : typeof description === 'string'
-              ? (
-                <p className="text-sm text-gray-700 leading-relaxed mb-3">
-                  {description}
-                </p>
-                )
-              : null}
-        </div>
-        <div className="mt-2">
+
+        <p
+          style={{
+            fontSize: '14px',
+            lineHeight: 1.7,
+            color: '#374151',
+            ...(isExpanded
+              ? {}
+              : {
+                  display: '-webkit-box',
+                  WebkitLineClamp: 3,
+                  WebkitBoxOrient: 'vertical' as const,
+                  overflow: 'hidden'
+                })
+          }}
+        >
+          {Array.isArray(description) ? description.join(' ') : description}
+        </p>
+
+        <button
+          type="button"
+          onClick={() => setIsExpanded((prev) => !prev)}
+          style={{
+            background: 'none',
+            border: 'none',
+            color: '#4f46e5',
+            fontSize: '14px',
+            fontWeight: 600,
+            cursor: 'pointer',
+            padding: 0,
+            marginTop: '6px'
+          }}
+        >
+          {isExpanded ? 'Show less' : '...more'}
+        </button>
+
+        <div style={{ marginTop: '16px' }}>
           {tags.map((tag) => (
             <span
               key={tag}
@@ -281,6 +363,12 @@ export default function EventInfo({
         }
 
         .share-modal { animation: modalIn 0.2s ease-out both; }
+
+        @media (max-width: 639px) {
+          .event-key-details-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+          }
+        }
       `}</style>
     </>
   );

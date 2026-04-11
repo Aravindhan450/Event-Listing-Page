@@ -38,6 +38,7 @@ export default function EventPage({ id }: EventPageProps) {
     id: matchedEvent.id,
     title: matchedEvent.title,
     category: matchedEvent.category,
+    eventType: matchedEvent.type,
     date,
     time,
     description: [
@@ -70,6 +71,7 @@ export default function EventPage({ id }: EventPageProps) {
                 category={event.category}
                 date={event.date}
                 time={event.time}
+                eventType={event.eventType}
                 title={event.title}
                 speaker={event.speaker}
                 viewerCount={event.viewerCount}

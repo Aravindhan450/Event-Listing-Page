@@ -108,9 +108,14 @@ function getRandomDelayMs(): number {
 
 export default function LiveChat({ viewerCount }: LiveChatProps) {
   const [messages, setMessages] = useState<Message[]>(INITIAL_MESSAGES);
+  const [reactions, setReactions] = useState<Record<number, Record<string, number>>>({});
+  const [hoveredMessage, setHoveredMessage] = useState<number | null>(null);
   const [draft, setDraft] = useState('');
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [nextId, setNextId] = useState(INITIAL_MESSAGES.length + 1);
   const [intervalDelay, setIntervalDelay] = useState(getRandomDelayMs());
+  const [isPaused, setIsPaused] = useState(false);
+  const [hasNewMessages, setHasNewMessages] = useState(false);
   const messagesListRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -146,11 +151,48 @@ export default function LiveChat({ viewerCount }: LiveChatProps) {
       return;
     }
 
+    if (isPaused) {
+      setHasNewMessages(true);
+      return;
+    }
+
+    setHasNewMessages(false);
+
     list.scrollTo({
       top: list.scrollHeight,
       behavior: 'smooth',
     });
-  }, [messages]);
+  }, [messages, isPaused]);
+
+  useEffect(() => {
+    if (isPaused) {
+      return;
+    }
+
+    const list = messagesListRef.current;
+    if (!list) {
+      return;
+    }
+
+    setHasNewMessages(false);
+    list.scrollTo({
+      top: list.scrollHeight,
+      behavior: 'smooth',
+    });
+  }, [isPaused]);
+
+  useEffect(() => {
+    const handleMouseDown = (event: MouseEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (target?.closest('.emoji-picker-panel') || target?.closest('.emoji-picker-toggle')) {
+        return;
+      }
+      setShowEmojiPicker(false);
+    };
+
+    document.addEventListener('mousedown', handleMouseDown);
+    return () => document.removeEventListener('mousedown', handleMouseDown);
+  }, []);
 
   const sendMessage = () => {
     const trimmed = draft.trim();
@@ -173,6 +215,27 @@ export default function LiveChat({ viewerCount }: LiveChatProps) {
     setDraft('');
   };
 
+  const addReaction = (messageId: number, emoji: string) => {
+    setReactions((prev) => ({
+      ...prev,
+      [messageId]: {
+        [emoji]: 1,
+      },
+    }));
+  };
+
+  const removeReaction = (messageId: number, emoji: string) => {
+    setReactions((prev) => {
+      if (!prev[messageId]?.[emoji]) {
+        return prev;
+      }
+
+      const next = { ...prev };
+      delete next[messageId];
+      return next;
+    });
+  };
+
   return (
     <aside className="flex flex-col h-full max-h-[520px] overflow-hidden rounded-xl border border-outline-variant/30 bg-surface-container-lowest">
       <div className="shrink-0 flex items-center justify-between border-b border-outline-variant/30 px-4 py-3">
@@ -187,11 +250,62 @@ export default function LiveChat({ viewerCount }: LiveChatProps) {
         <span className="text-xs font-semibold text-on-surface-variant">{viewerCount} VIEWERS</span>
       </div>
 
-      <div ref={messagesListRef} className="flex-1 overflow-y-auto px-3 py-2 space-y-4 [scrollbar-gutter:stable]">
-        {messages.map((message) => {
+      <div
+        ref={messagesListRef}
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
+        className="relative flex-1 overflow-y-auto px-3 py-2 space-y-4 [scrollbar-gutter:stable]"
+      >
+        {messages.map((message, index) => {
           const [textClass, bgClass] = message.color.split(' ');
+          const messageReactions = reactions[message.id];
           return (
-            <div key={message.id} className="flex items-start gap-3 animate-[messageIn_200ms_ease-out]">
+            <div
+              key={message.id}
+              onMouseEnter={() => setHoveredMessage(message.id)}
+              onMouseLeave={() => setHoveredMessage(null)}
+              className={`flex items-start gap-3 ${
+                index === messages.length - 1 && messages.length > INITIAL_MESSAGES.length
+                  ? 'chat-message-new'
+                  : ''
+              }`}
+              style={{ position: 'relative' }}
+            >
+              {hoveredMessage === message.id && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '-32px',
+                    left: 0,
+                    backgroundColor: '#ffffff',
+                    borderRadius: '99px',
+                    boxShadow: '0 2px 12px rgba(0,0,0,0.1)',
+                    border: '1px solid #e5e7eb',
+                    padding: '4px 8px',
+                    display: 'flex',
+                    gap: '4px',
+                    zIndex: 10
+                  }}
+                >
+                  {['👍', '🔥', '❤️', '😄'].map((emoji) => (
+                    <button
+                      key={emoji}
+                      type="button"
+                      onClick={() => addReaction(message.id, emoji)}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        fontSize: '16px',
+                        cursor: 'pointer',
+                        padding: '0'
+                      }}
+                    >
+                      {emoji}
+                    </button>
+                  ))}
+                </div>
+              )}
+
               <div className={`h-8 w-8 rounded-full ${bgClass} ${textClass} text-xs font-semibold flex items-center justify-center`}>
                 {message.initials}
               </div>
@@ -201,21 +315,124 @@ export default function LiveChat({ viewerCount }: LiveChatProps) {
                   <span className="text-xs text-on-surface-variant/70">{message.time}</span>
                 </div>
                 <p className="text-sm text-on-surface-variant leading-relaxed">{message.text}</p>
+                {messageReactions && Object.keys(messageReactions).length > 0 && (
+                  <div style={{ marginTop: '6px', display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                    {Object.entries(messageReactions).map(([emoji, count]) => (
+                      <button
+                        key={emoji}
+                        type="button"
+                        onClick={() => removeReaction(message.id, emoji)}
+                        style={{
+                          backgroundColor: '#f1f5f9',
+                          borderRadius: '99px',
+                          padding: '2px 8px',
+                          fontSize: '11px',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          border: 'none',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <span>{emoji}</span>
+                        <span>{count}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           );
         })}
         <div ref={messagesEndRef} />
+
+        {hasNewMessages && isPaused && (
+          <div
+            onClick={() => {
+              const list = messagesListRef.current;
+              if (list) {
+                list.scrollTo({ top: list.scrollHeight, behavior: 'smooth' });
+              }
+              setHasNewMessages(false);
+              setIsPaused(false);
+            }}
+            style={{
+              position: 'absolute',
+              bottom: '70px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              backgroundColor: '#4f46e5',
+              color: '#ffffff',
+              borderRadius: '99px',
+              padding: '6px 16px',
+              fontSize: '12px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              zIndex: 10
+            }}
+          >
+            ↓ New messages
+          </div>
+        )}
       </div>
 
       <div className="shrink-0 border-t border-outline-variant/30 p-3 bg-white">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2" style={{ position: 'relative' }}>
+          {showEmojiPicker && (
+            <div
+              className="emoji-picker-panel"
+              style={{
+                position: 'absolute',
+                bottom: '64px',
+                left: 0,
+                backgroundColor: '#ffffff',
+                borderRadius: '12px',
+                boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
+                border: '1px solid #e5e7eb',
+                padding: '10px',
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '6px',
+                width: '260px',
+                zIndex: 20
+              }}
+            >
+              {['👋', '🔥', '👏', '💡', '❤️', '😄', '🚀', '👍', '🤔', '💻', '⚡', '🎯', '😂', '🙌', '✅', '❓', '💯', '🛠️', '📦', '🌐'].map((emoji) => (
+                <button
+                  key={emoji}
+                  type="button"
+                  onClick={() => {
+                    setDraft((prev) => `${prev}${emoji}`);
+                    setShowEmojiPicker(false);
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#f1f5f9';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    fontSize: '20px',
+                    cursor: 'pointer',
+                    padding: '4px',
+                    borderRadius: '6px'
+                  }}
+                >
+                  {emoji}
+                </button>
+              ))}
+            </div>
+          )}
+
           <input
             type="text"
             value={draft}
+            maxLength={150}
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === 'Enter') {
+              if (e.key === 'Enter' && draft.trim()) {
                 e.preventDefault();
                 sendMessage();
               }
@@ -225,12 +442,39 @@ export default function LiveChat({ viewerCount }: LiveChatProps) {
           />
           <button
             type="button"
+            className="emoji-picker-toggle"
+            onClick={() => setShowEmojiPicker((prev) => !prev)}
+            style={{
+              background: 'none',
+              border: 'none',
+              fontSize: '18px',
+              cursor: 'pointer',
+              padding: '4px 8px',
+              color: '#6b7280'
+            }}
+          >
+            🙂
+          </button>
+          <button
+            type="button"
             onClick={sendMessage}
             className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary transition-colors hover:opacity-90"
           >
             Send
           </button>
         </div>
+        {draft.length > 100 && (
+          <div
+            style={{
+              fontSize: '11px',
+              color: draft.length > 130 ? '#ef4444' : '#9ca3af',
+              textAlign: 'right',
+              marginTop: '6px'
+            }}
+          >
+            {draft.length}/150
+          </div>
+        )}
       </div>
 
       <style jsx>{`
@@ -244,15 +488,13 @@ export default function LiveChat({ viewerCount }: LiveChatProps) {
           }
         }
 
-        @keyframes messageIn {
-          from {
-            opacity: 0;
-            transform: translateY(4px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+        @keyframes messageSlideIn {
+          from { opacity: 0; transform: translateY(12px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+
+        .chat-message-new {
+          animation: messageSlideIn 0.25s ease-out both;
         }
       `}</style>
     </aside>
