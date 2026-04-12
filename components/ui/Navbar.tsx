@@ -23,6 +23,7 @@ export default function Navbar({
   placeholder = 'Search frameworks, summits, or workshops...',
 }: NavbarProps) {
   const [showProfile, setShowProfile] = useState(false);
+  const [showMobileSearch, setShowMobileSearch] = useState(false);
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const [signOutHovered, setSignOutHovered] = useState(false);
 
@@ -31,6 +32,9 @@ export default function Navbar({
       const target = event.target as HTMLElement | null;
       if (!target?.closest('.profile-dropdown')) {
         setShowProfile(false);
+      }
+      if (!target?.closest('.mobile-search-wrap')) {
+        setShowMobileSearch(false);
       }
     };
 
@@ -54,11 +58,22 @@ export default function Navbar({
           </div>
 
           <div className="justify-self-center w-full">
-            <SearchBar
-              value={queryValue}
-              onChange={handleQueryChange}
-              placeholder={placeholder}
-            />
+            <button
+              type="button"
+              aria-label="Open search"
+              onClick={() => setShowMobileSearch((prev) => !prev)}
+              className="mobile-search-wrap mx-auto flex h-9 w-9 items-center justify-center rounded-full hover:bg-slate-100 transition-all active:scale-90 sm:hidden"
+            >
+              <span className="material-symbols-outlined text-slate-700">search</span>
+            </button>
+
+            <div className="hidden sm:block">
+              <SearchBar
+                value={queryValue}
+                onChange={handleQueryChange}
+                placeholder={placeholder}
+              />
+            </div>
           </div>
 
           <div className="min-w-0 justify-self-end">
@@ -139,6 +154,18 @@ export default function Navbar({
               </button>
           </div>
         </div>
+
+        {showMobileSearch && (
+          <div className="mobile-search-wrap pb-3 sm:hidden">
+            <SearchBar
+              value={queryValue}
+              onChange={handleQueryChange}
+              placeholder={placeholder}
+              wrapperClassName="py-[10px]"
+              inputClassName="text-sm"
+            />
+          </div>
+        )}
 
       </div>
     </nav>

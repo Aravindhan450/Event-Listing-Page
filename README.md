@@ -61,48 +61,63 @@ VickyBytes is a live tech events platform that helps developers discover and wat
 
 ## Project Structure
 
-Vicky_Bytes/
+```text
+vicky_bytes/
 ├── app/
-│   ├── layout.tsx                  # Root layout + SEO metadata
-│   ├── page.tsx                    # Homepage entry point
+│   ├── events/
+│   │   ├── [id]/
+│   │   │   └── page.tsx
+│   │   └── page.tsx
 │   ├── globals.css
-│   └── events/
-│       └── [id]/
-│           └── page.tsx            # Event streaming page
-│
+│   ├── layout.tsx
+│   └── page.tsx
 ├── components/
-│   ├── ui/                         # Reusable atomic components
-│   │   ├── Navbar.tsx
-│   │   ├── Footer.tsx
-│   │   └── VideoPlayer.tsx
-│   │
-│   ├── home/                       # Sections used only on HomePage
-│   │   ├── HeroSection.tsx
-│   │   ├── EventGrid.tsx
+│   ├── event/
+│   │   ├── EventInfo.tsx
+│   │   ├── EventPage.tsx
+│   │   ├── EventsPage.tsx
+│   │   ├── LiveChat.tsx
+│   │   └── ShareModal.tsx
+│   ├── home/
 │   │   ├── EventCard.tsx
+│   │   ├── EventGrid.tsx
 │   │   ├── FilterBar.tsx
+│   │   ├── HeroSection.tsx
+│   │   ├── HomePage.tsx
 │   │   ├── SearchBar.tsx
 │   │   ├── StatsRow.tsx
 │   │   └── WhyHostSection.tsx
-│   │
-│   └── event/                      # Sections used only on EventPage
-│       ├── LiveChat.tsx
-│       ├── EventInfo.tsx
-│       └── ShareModal.tsx
-│
+│   ├── ui/
+│   │   ├── Footer.tsx
+│   │   ├── Navbar.tsx
+│   │   └── VideoPlayer.tsx
+│   └── LiveChat.tsx
 ├── data/
-│   └── events.js                   # Events data array
-│
+│   └── events.js
 ├── hooks/
-│   └── useDebounce.ts              # Custom hooks
-│
+│   ├── useDebounce.ts
+│   └── useEventSearch.ts
 ├── public/
+│   ├── file.svg
+│   ├── globe.svg
+│   ├── manifest.json
+│   ├── next.svg
 │   ├── robots.txt
-│   └── sitemap.xml
-│
+│   ├── sitemap.xml
+│   ├── vercel.svg
+│   └── window.svg
+├── types/
+│   └── event.ts
+├── .gitignore
+├── eslint.config.mjs
+├── next-env.d.ts
 ├── next.config.ts
+├── package-lock.json
 ├── package.json
+├── postcss.config.mjs
+├── README.md
 └── tsconfig.json
+```
 
 ## Deployment
 
@@ -111,7 +126,6 @@ Vicky_Bytes/
 Deployment platform: Vercel
 
 Live URL: [https://event-listing-page-sepia.vercel.app/](https://event-listing-page-sepia.vercel.app/)
-
 
 
 
