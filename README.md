@@ -41,7 +41,7 @@ VickyBytes is a live tech events platform that helps developers discover and wat
 | React 19.2.4 | UI Library |
 | TypeScript | Type safety across components |
 | Tailwind CSS | Utility-first responsive styling |
-| CSS Animations | Scroll reveals, transitions, preloader |
+| CSS Animations | Scroll reveals, transitions |
 | Vercel | Production deployment |
 | Cloudinary | Custom event thumbnail hosting |
 | YouTube iFrame API | Embedded video streaming |
