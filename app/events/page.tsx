@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import EventsPage from '../../components/event/EventsPage';
 
@@ -7,5 +8,9 @@ export const metadata: Metadata = {
 };
 
 export default function EventsRoutePage() {
-  return <EventsPage />;
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-background" />}>
+      <EventsPage />
+    </Suspense>
+  );
 }

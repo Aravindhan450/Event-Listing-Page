@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import EventPage from '../../../components/event/EventPage';
 import { events } from '../../../data/events';
@@ -50,5 +51,9 @@ export async function generateMetadata({ params }: EventPageProps): Promise<Meta
 
 export default async function EventDetailPage({ params }: EventPageProps) {
   const { id } = await params;
-  return <EventPage id={id} />;
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-background" />}>
+      <EventPage id={id} />
+    </Suspense>
+  );
 }

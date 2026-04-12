@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import HomePage from '../components/home/HomePage';
 
@@ -8,5 +9,9 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <HomePage />;
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-background" />}>
+      <HomePage />
+    </Suspense>
+  );
 }
