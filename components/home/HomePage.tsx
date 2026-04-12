@@ -7,6 +7,7 @@ import WhyHostSection from './WhyHostSection';
 import Footer from '../ui/Footer';
 import Navbar from '../ui/Navbar';
 import type { Event } from '../../types/event';
+import { useEventSearch } from '../../hooks/useEventSearch';
 
 const ALLOWED_CATEGORIES = ['Development', 'DevOps', 'AI/ML', 'Cloud', 'Cybersecurity', 'Mobile', 'Web3', 'Backend', 'Design'];
 
@@ -40,16 +41,23 @@ function highlightText(text: string, query: string): React.ReactNode {
 function LikeButton() {
   const [liked, setLiked] = useState(false);
   return (
-    <button 
+    <button
       type="button"
       aria-label={liked ? 'Remove from favorites' : 'Add to favorites'}
       onClick={(e) => {
         e.preventDefault();
-        setLiked(!liked);
+        e.stopPropagation();
+        setLiked((prev) => !prev);
+      }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          e.stopPropagation();
+        }
       }}
       className="absolute top-3 right-3 p-2 rounded-full bg-surface/80 backdrop-blur-sm transition-colors duration-200 cursor-pointer active:scale-110"
     >
-      <span 
+      <span
         className={`material-symbols-outlined text-xl! ${liked ? 'text-[#ef4444]' : 'text-white'}`}
         style={{ fontVariationSettings: liked ? "'FILL' 1" : "'FILL' 0" }}
       >
@@ -74,14 +82,15 @@ function EventCard({ event, query, viewMode }: { event: Event; query: string; vi
     (typeof event.datetime === 'string' && event.datetime.includes('•')
       ? event.datetime.split('•')[1].trim()
       : '');
+  const isList = viewMode === 'list';
 
   return (
     <article
       role="button"
       tabIndex={0}
       aria-label={`Open event ${event.title}`}
-      className={`group w-full h-full bg-surface-container-lowest rounded-xl editorial-shadow overflow-hidden hover:scale-[1.02] border border-outline-variant/10 flex cursor-pointer ${
-        viewMode === 'list' ? 'flex-col sm:flex-row sm:h-[140px]' : 'flex-col'
+      className={`group flex h-full w-full cursor-pointer overflow-hidden rounded-xl border border-outline-variant/10 bg-surface-container-lowest editorial-shadow hover:scale-[1.02] ${
+        isList ? 'flex-col sm:flex-row' : 'flex-col'
       }`}
       onClick={() => router.push(`/events/${event.id}`)}
       onKeyDown={(eventKey) => {
@@ -97,23 +106,19 @@ function EventCard({ event, query, viewMode }: { event: Event; query: string; vi
       }}
     >
       <div
-        className={`relative overflow-hidden transition-transform duration-300 ease-out group-hover:scale-[1.03] ${
-          viewMode === 'list' ? 'w-full sm:w-[200px] sm:h-full sm:shrink-0' : 'w-full'
+        className={`relative overflow-hidden bg-slate-100 transition-transform duration-300 ease-out group-hover:scale-[1.02] ${
+          isList ? 'w-full aspect-[16/9] sm:w-[220px] sm:aspect-[4/3] sm:shrink-0' : 'w-full aspect-[16/9]'
         }`}
-        style={{
-          height: viewMode === 'list' ? undefined : undefined
-        }}
       >
         <Image
-          alt={event.alt} 
-          className="rounded-t-xl object-cover"
+          alt={event.alt}
+          className={`h-full w-full ${isList ? 'sm:rounded-none' : ''} rounded-t-xl object-contain object-top`}
           width={600}
           height={340}
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           style={{
             width: '100%',
-            height: viewMode === 'list' ? '100%' : 'auto',
-            aspectRatio: viewMode === 'list' ? undefined : '16 / 9',
+            height: '100%',
             opacity: imageLoaded ? 1 : 0.5,
             filter: imageLoaded ? 'blur(0px)' : 'blur(8px)',
             transition: 'opacity 0.35s ease, filter 0.35s ease, transform 0.35s ease'
@@ -165,13 +170,13 @@ function EventCard({ event, query, viewMode }: { event: Event; query: string; vi
         }} />
         <LikeButton />
       </div>
-      <div className="p-4 sm:p-5 flex flex-col flex-1 min-h-42.5 sm:min-h-47.5">
+      <div className="flex flex-1 flex-col p-4 sm:p-5">
         <div className="mb-2" style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
           <span className={categoryPillClasses} style={{ whiteSpace: 'nowrap', flexShrink: 0 }}>
             <span>{event.category}</span>
           </span>
         </div>
-        <span className="text-xs text-on-surface-variant block" style={{ whiteSpace: viewMode === 'list' ? 'nowrap' : 'normal', fontSize: '12px' }}>
+        <span className="block text-xs text-on-surface-variant" style={{ whiteSpace: isList ? 'nowrap' : 'normal', fontSize: '12px' }}>
           {eventTime ? `${eventDate} • ${eventTime}` : eventDate}
         </span>
         <h3 className="text-base sm:text-lg font-bold text-on-surface mb-4 line-clamp-2 leading-tight">
@@ -221,7 +226,6 @@ function EmptyState({
 }
 
 export default function Page() {
-  const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
   const [showFilters, setShowFilters] = useState(false);
   const [sortBy, setSortBy] = useState('Default');
@@ -232,6 +236,11 @@ export default function Page() {
   const [showTrending, setShowTrending] = useState(false);
   const [showUpcoming, setShowUpcoming] = useState(false);
   const allEvents = events as Event[];
+  const {
+    query: searchQuery,
+    setQuery: setSearchQuery,
+    filteredEvents: searchedEvents,
+  } = useEventSearch(allEvents);
 
   useEffect(() => {
     if (process.env.NODE_ENV !== 'development') {
@@ -246,7 +255,6 @@ export default function Page() {
   }, [allEvents]);
 
   const finalEvents = useMemo(() => {
-    const normalizedSearchQuery = searchQuery.trim().toLowerCase();
     const parseEventDate = (datetime: string) => {
       const datePart = datetime.split('•')[0].trim();
       return new Date(datePart);
@@ -268,8 +276,7 @@ export default function Page() {
       return parsedHour;
     };
 
-    let filteredEvents = allEvents.filter((event) => {
-      const matchesSearch = (event.title || '').toLowerCase().includes(normalizedSearchQuery);
+    let filteredEvents = searchedEvents.filter((event) => {
       const matchesCategory = activeCategory === 'All' || event.category === activeCategory;
 
       const eventHour = parseHour(event.datetime || '');
@@ -289,7 +296,7 @@ export default function Page() {
         (eventType === 'Bootcamp' && (typeLower === 'bootcamp' || titleLower.includes('bootcamp'))) ||
         (eventType === 'Expo' && (typeLower === 'expo' || titleLower.includes('expo')));
 
-      return matchesSearch && matchesCategory && matchesTimeOfDay && matchesEventType;
+      return matchesCategory && matchesTimeOfDay && matchesEventType;
     });
 
     const today = new Date();
@@ -341,7 +348,7 @@ export default function Page() {
     }
 
     return filteredEvents;
-  }, [searchQuery, activeCategory, sortBy, timeRange, timeOfDay, eventType, showTrending, showUpcoming, allEvents]);
+  }, [searchedEvents, activeCategory, sortBy, timeRange, timeOfDay, eventType, showTrending, showUpcoming]);
 
   const filteredEvents = finalEvents;
 
@@ -425,9 +432,9 @@ export default function Page() {
   <h2 className="text-xl font-semibold text-gray-900">Explore Events</h2>
   <p className="text-gray-600 mt-2 max-w-xl mx-auto font-normal" style={{ lineHeight: 1.75 }}>Find technical events across cloud, AI, DevOps, and emerging technologies.</p>
 </div>
-<div className="animate-fade-up delay-3 mt-5 anim-fade-up d2 flex min-w-0 items-center gap-2 sm:gap-4">
-  <div className="min-w-0 flex-1 overflow-x-auto sm:overflow-visible [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-    <div className="flex flex-nowrap items-center gap-2 whitespace-nowrap pr-1 sm:flex-wrap sm:gap-3 sm:whitespace-normal sm:pr-0">
+<div className="animate-fade-up delay-3 mt-5 anim-fade-up d2 grid grid-cols-1 gap-3 sm:mt-6 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start sm:gap-4">
+  <div className="min-w-0 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+    <div className="mx-auto flex w-max flex-nowrap items-center gap-3 whitespace-nowrap px-1 sm:w-full sm:flex-wrap sm:justify-center sm:whitespace-normal sm:px-0">
       {['All', 'Development', 'DevOps', 'AI/ML', 'Cloud', 'Cybersecurity', 'Mobile', 'Web3', 'Backend', 'Design'].map((cat) => (
         <button
           key={cat}
@@ -446,23 +453,25 @@ export default function Page() {
     </div>
   </div>
 
-  <button
-    type="button"
-    onClick={() => setShowFilters(!showFilters)}
-    className={`interactive-btn animate-fade-up delay-4 anim-fade-up d3 inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border shadow-sm transition-all sm:h-auto sm:w-auto sm:gap-1.5 sm:px-4 sm:py-2.5 ${
-      showFilters
-        ? 'border-indigo-600 bg-indigo-600 text-white'
-        : 'border-indigo-600 bg-white text-indigo-600 hover:bg-indigo-50'
-    }`}
-    aria-label={showFilters ? 'Hide advanced filters' : 'Show advanced filters'}
-  >
-    <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true">
-      <line x1="4" y1="6" x2="20" y2="6" />
-      <line x1="8" y1="12" x2="16" y2="12" />
-      <line x1="11" y1="18" x2="13" y2="18" />
-    </svg>
-    <span className="hidden text-sm font-semibold sm:inline">{showFilters ? 'Hide Filters' : 'Advanced Filters'}</span>
-  </button>
+  <div className="sm:justify-self-end">
+    <button
+      type="button"
+      onClick={() => setShowFilters(!showFilters)}
+      className={`interactive-btn animate-fade-up delay-4 anim-fade-up d3 inline-flex h-10 w-10 items-center justify-center rounded-full border shadow-sm transition-all sm:h-auto sm:w-auto sm:gap-1.5 sm:px-4 sm:py-2.5 ${
+        showFilters
+          ? 'border-indigo-600 bg-indigo-600 text-white'
+          : 'border-indigo-600 bg-white text-indigo-600 hover:bg-indigo-50'
+      }`}
+      aria-label={showFilters ? 'Hide advanced filters' : 'Show advanced filters'}
+    >
+      <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true">
+        <line x1="4" y1="6" x2="20" y2="6" />
+        <line x1="8" y1="12" x2="16" y2="12" />
+        <line x1="11" y1="18" x2="13" y2="18" />
+      </svg>
+      <span className="hidden text-sm font-semibold sm:inline">{showFilters ? 'Hide Filters' : 'Advanced Filters'}</span>
+    </button>
+  </div>
 </div>
 
 {showFilters && (

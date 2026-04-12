@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import HomePage from '../components/home/HomePage';
 
 export const metadata: Metadata = {
-  title: 'Browse Live Events — VickyBytes',
+  title: 'VickyBytes - Browse Live Events ',
   description:
     'Explore 16+ curated tech events across Cloud, AI/ML, DevOps, Cybersecurity and more. Join live for free.',
 };

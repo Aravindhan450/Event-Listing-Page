@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import SearchBar from '../home/SearchBar';
 
 type NavbarProps = {
   searchQuery?: string;
@@ -41,17 +42,12 @@ export default function Navbar({
     return () => document.removeEventListener('mousedown', handleMouseDown);
   }, []);
 
-  const inputBinding = useMemo(
-    () =>
-      onSearchQueryChange
-        ? {
-            value: searchQuery ?? '',
-            onChange: (event: React.ChangeEvent<HTMLInputElement>) =>
-              onSearchQueryChange(event.target.value),
-          }
-        : {},
-    [onSearchQueryChange, searchQuery]
-  );
+  const queryValue = searchQuery ?? '';
+  const handleQueryChange = (value: string) => {
+    if (onSearchQueryChange) {
+      onSearchQueryChange(value);
+    }
+  };
 
   return (
     <nav className="sticky top-0 z-[1000] overflow-visible border-b border-slate-200 bg-white animate-fade-in anim-slide-down">
@@ -72,22 +68,11 @@ export default function Navbar({
             </button>
 
             <div className="hidden sm:block">
-            <div style={{
-              display: 'flex', alignItems: 'center',
-              backgroundColor: '#ffffff', borderRadius: '99px',
-              padding: '12px 16px 12px 20px',
-              border: '1px solid rgba(15, 23, 42, 0.18)',
-              boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
-              gap: '12px', width: '100%'
-            }}>
-              <svg width="18" height="18" fill="none" stroke="#6b7280" strokeWidth="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-              <input
-                {...inputBinding}
+              <SearchBar
+                value={queryValue}
+                onChange={handleQueryChange}
                 placeholder={placeholder}
-                aria-label="Search events"
-                style={{ flex: 1, border: 'none', outline: 'none', fontSize: '15px', color: '#111827', background: 'transparent' }}
               />
-            </div>
             </div>
           </div>
 
@@ -172,22 +157,13 @@ export default function Navbar({
 
         {showMobileSearch && (
           <div className="mobile-search-wrap sm:hidden pb-3">
-            <div style={{
-              display: 'flex', alignItems: 'center',
-              backgroundColor: '#ffffff', borderRadius: '99px',
-              padding: '10px 14px 10px 16px',
-              border: '1px solid rgba(15, 23, 42, 0.18)',
-              boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
-              gap: '10px', width: '100%'
-            }}>
-              <svg width="16" height="16" fill="none" stroke="#6b7280" strokeWidth="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-              <input
-                {...inputBinding}
-                placeholder={placeholder}
-                aria-label="Search events"
-                style={{ flex: 1, border: 'none', outline: 'none', fontSize: '14px', color: '#111827', background: 'transparent' }}
-              />
-            </div>
+            <SearchBar
+              value={queryValue}
+              onChange={handleQueryChange}
+              placeholder={placeholder}
+              wrapperClassName="py-[10px]"
+              inputClassName="text-sm"
+            />
           </div>
         )}
 

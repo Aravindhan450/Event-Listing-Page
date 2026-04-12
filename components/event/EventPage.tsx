@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import VideoPlayer from '../ui/VideoPlayer';
 import LiveChat from './LiveChat';
 import Navbar from '../ui/Navbar';
 import { events } from '../../data/events';
 import type { Event } from '../../types/event';
 import Link from 'next/link';
+import { useEventSearch } from '../../hooks/useEventSearch';
 
 type EventPageProps = {
   id: string;
@@ -15,8 +16,35 @@ type EventPageProps = {
 export default function EventPage({ id }: EventPageProps) {
   const [isMobileChatOpen, setIsMobileChatOpen] = useState(false);
   const [isTabletChatOpen, setIsTabletChatOpen] = useState(false);
+  const [desktopChatHeight, setDesktopChatHeight] = useState<number | null>(null);
+  const leftContentRef = useRef<HTMLElement | null>(null);
+  const allEvents = events as Event[];
+  const { query, setQuery } = useEventSearch(allEvents);
   const parsedId = parseInt(id, 10);
-  const matchedEvent = (events as Event[]).find((e) => e.id === parsedId);
+  const matchedEvent = allEvents.find((e) => e.id === parsedId);
+
+  useEffect(() => {
+    const leftColumn = leftContentRef.current;
+    if (!leftColumn) {
+      return;
+    }
+
+    const updateHeight = () => {
+      const nextHeight = Math.ceil(leftColumn.getBoundingClientRect().height);
+      setDesktopChatHeight((prev) => (prev === nextHeight ? prev : nextHeight));
+    };
+
+    updateHeight();
+
+    const observer = new ResizeObserver(() => updateHeight());
+    observer.observe(leftColumn);
+    window.addEventListener('resize', updateHeight);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', updateHeight);
+    };
+  }, [matchedEvent?.id]);
 
   if (!matchedEvent) {
     return (
@@ -65,12 +93,16 @@ export default function EventPage({ id }: EventPageProps) {
   };
 
   return (
-    <div className="event-page min-h-screen overflow-x-hidden bg-background text-on-background">
-      <Navbar />
+    <div className="event-page min-h-screen bg-background text-on-background">
+      <Navbar
+        searchQuery={query}
+        onSearchQueryChange={setQuery}
+        placeholder="Search events by title, category, description, or tags..."
+      />
 
-      <main className="mx-auto w-full max-w-370 px-4 pb-6 pt-4 sm:px-6 sm:pb-8 sm:pt-5 lg:px-8 lg:pb-10 lg:pt-6">
+      <main className="mx-auto w-full max-w-370 overflow-x-hidden px-4 pb-6 pt-4 sm:px-6 sm:pb-8 sm:pt-5 lg:px-8 lg:pb-10 lg:pt-6">
         <div className="event-page-layout grid grid-cols-1 items-start gap-4 sm:gap-6 lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-          <section className="min-w-0">
+          <section ref={leftContentRef} className="min-w-0">
             <div className="anim-scale-in d1 animate-scale-in mb-3 w-full sm:mb-4">
               <div className="w-full">
                 <VideoPlayer
@@ -100,14 +132,17 @@ export default function EventPage({ id }: EventPageProps) {
               </button>
 
               {isTabletChatOpen && (
-                <div className="mt-3 h-115 overflow-hidden rounded-xl border border-[rgba(15,23,42,0.24)]">
+                <div className="mt-3 flex h-115 min-h-0 flex-col overflow-hidden rounded-xl border border-[rgba(15,23,42,0.24)]">
                   <LiveChat viewerCount={event.viewerCount} />
                 </div>
               )}
             </section>
           </section>
 
-          <aside className="event-chat-column anim-fade-left d2 animate-fade-left sticky top-20 hidden h-[calc(100vh-6rem)] min-h-136 overflow-hidden rounded-xl border border-[rgba(15,23,42,0.24)] lg:flex">
+          <aside
+            className="event-chat-column anim-fade-left d2 animate-fade-left hidden min-h-0 self-start overflow-hidden rounded-xl border border-[rgba(15,23,42,0.24)] lg:flex lg:h-[calc(100vh-6rem)]"
+            style={desktopChatHeight ? { height: `${desktopChatHeight}px` } : undefined}
+          >
             <LiveChat viewerCount={event.viewerCount} />
           </aside>
         </div>

@@ -245,14 +245,10 @@ export default function LiveChat({ viewerCount }: LiveChatProps) {
 
   return (
     <aside
-      className="h-full min-h-0 w-full max-h-full"
+      className="flex h-full min-h-0 w-full max-h-full flex-col overflow-hidden"
       style={{
         backgroundColor: '#f8fafc',
         borderRadius: '16px',
-        overflow: 'hidden',
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100%'
       }}
     >
       <div
@@ -340,8 +336,8 @@ export default function LiveChat({ viewerCount }: LiveChatProps) {
           setIsPaused(false);
           setHasNewMessages(false);
         }}
-        className="relative space-y-2 [scrollbar-gutter:stable]"
-        style={{ backgroundColor: '#f8fafc', flex: 1, overflowY: 'auto', minHeight: 0, padding: '8px 0' }}
+        className="relative min-h-0 flex-1 space-y-2 overflow-y-auto [scrollbar-gutter:stable]"
+        style={{ backgroundColor: '#f8fafc', padding: '8px 0' }}
       >
         {messages.map((message, index) => {
           const [textClass, bgClass] = message.color.split(' ');
@@ -495,7 +491,7 @@ export default function LiveChat({ viewerCount }: LiveChatProps) {
         )}
       </div>
 
-      <div className="px-2.5 py-2.5 sm:px-3 sm:py-2.5" style={{ borderTop: '2px solid #e5e7eb', backgroundColor: '#ffffff', flexShrink: 0 }}>
+      <div className="shrink-0 px-2.5 py-2.5 sm:px-3 sm:py-2.5" style={{ borderTop: '2px solid #e5e7eb', backgroundColor: '#ffffff' }}>
         <div className="flex items-center gap-1.5 sm:gap-2" style={{ position: 'relative' }}>
           {showEmojiPicker && (
             <div
