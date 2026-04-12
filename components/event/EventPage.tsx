@@ -368,7 +368,8 @@ export default function EventPage({ id }: EventPageProps) {
       <button
         type="button"
         onClick={() => setIsMobileChatOpen(true)}
-        className="fixed bottom-4 right-4 z-40 inline-flex items-center gap-2 rounded-full bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-lg md:hidden"
+        className="fixed right-4 z-40 inline-flex items-center gap-2 rounded-full bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-lg md:hidden"
+        style={{ bottom: 'max(1rem, env(safe-area-inset-bottom))' }}
       >
         <span className="material-symbols-outlined text-base">chat</span>
         Live chat
