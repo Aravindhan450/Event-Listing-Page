@@ -98,14 +98,10 @@ vicky_bytes/
 │   ├── useDebounce.ts
 │   └── useEventSearch.ts
 ├── public/
-│   ├── file.svg
-│   ├── globe.svg
 │   ├── manifest.json
 │   ├── next.svg
 │   ├── robots.txt
 │   ├── sitemap.xml
-│   ├── vercel.svg
-│   └── window.svg
 ├── types/
 │   └── event.ts
 ├── .gitignore
