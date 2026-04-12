@@ -87,7 +87,7 @@ export default function Navbar({
                   setShowProfile((prev) => !prev);
                 }}
               >
-                <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#4f46e5', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>AK</div>
+                <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#4f46e5', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>AB</div>
                 {showProfile && (
                   <div style={{
                     position: 'absolute',
@@ -102,9 +102,9 @@ export default function Navbar({
                     overflow: 'hidden'
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '14px 14px 12px', borderBottom: '1px solid #e5e7eb' }}>
-                      <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#4f46e5', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: 700 }}>AK</div>
+                      <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#4f46e5', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: 700 }}>AB</div>
                       <div>
-                        <div style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a' }}>Aravindhan K</div>
+                        <div style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a' }}>Aravindhan B</div>
                         <div style={{ fontSize: '12px', color: '#94a3b8' }}>@aravindhan · Developer</div>
                       </div>
                     </div>
