@@ -23,7 +23,6 @@ export default function Navbar({
   placeholder = 'Search frameworks, summits, or workshops...',
 }: NavbarProps) {
   const [showProfile, setShowProfile] = useState(false);
-  const [showMobileSearch, setShowMobileSearch] = useState(false);
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const [signOutHovered, setSignOutHovered] = useState(false);
 
@@ -32,9 +31,6 @@ export default function Navbar({
       const target = event.target as HTMLElement | null;
       if (!target?.closest('.profile-dropdown')) {
         setShowProfile(false);
-      }
-      if (!target?.closest('.mobile-search-wrap')) {
-        setShowMobileSearch(false);
       }
     };
 
@@ -51,29 +47,18 @@ export default function Navbar({
 
   return (
     <nav className="sticky top-0 z-[1000] overflow-visible border-b border-slate-200 bg-white animate-fade-in anim-slide-down">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 py-3 sm:gap-4 sm:py-4">
+      <div className="w-full px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-[minmax(0,1fr)_minmax(220px,640px)_minmax(0,1fr)] items-center gap-3 py-3 sm:gap-4 sm:py-4">
           <div className="min-w-0 justify-self-start">
             <span style={{ fontWeight: 700, fontSize: '18px', whiteSpace: 'nowrap' }} className="text-indigo-900 tracking-tight">VickyBytes</span>
           </div>
 
-          <div className="justify-self-center w-full max-w-[600px]">
-            <button
-              type="button"
-              aria-label="Open search"
-              onClick={() => setShowMobileSearch((prev) => !prev)}
-              className="mobile-search-wrap mx-auto flex h-9 w-9 items-center justify-center rounded-full hover:bg-slate-100 transition-all active:scale-90 sm:hidden"
-            >
-              <span className="material-symbols-outlined text-slate-700">search</span>
-            </button>
-
-            <div className="hidden sm:block">
-              <SearchBar
-                value={queryValue}
-                onChange={handleQueryChange}
-                placeholder={placeholder}
-              />
-            </div>
+          <div className="justify-self-center w-full">
+            <SearchBar
+              value={queryValue}
+              onChange={handleQueryChange}
+              placeholder={placeholder}
+            />
           </div>
 
           <div className="min-w-0 justify-self-end">
@@ -154,18 +139,6 @@ export default function Navbar({
               </button>
           </div>
         </div>
-
-        {showMobileSearch && (
-          <div className="mobile-search-wrap sm:hidden pb-3">
-            <SearchBar
-              value={queryValue}
-              onChange={handleQueryChange}
-              placeholder={placeholder}
-              wrapperClassName="py-[10px]"
-              inputClassName="text-sm"
-            />
-          </div>
-        )}
 
       </div>
     </nav>

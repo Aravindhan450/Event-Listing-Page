@@ -393,84 +393,73 @@ export default function Page() {
   </div>
 </div>
 
-  <div className="stats-row animate-fade-up delay-5 anim-fade-up d4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full max-w-4xl mx-auto mt-8 sm:mt-10">
+  <div className="stats-row animate-fade-up delay-5 anim-fade-up d4 mt-6 w-full max-w-4xl mx-auto grid grid-cols-3 gap-2 sm:mt-10 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
     {[
-      ['16 Events', 'Across 8 categories'],
-      ['3 Live Today', 'Join now free'],
-      ['2,400+ Devs', 'Active this month'],
-    ].map(([stat, subLabel]) => {
-      const [statNumber, ...statLabelParts] = stat.split(' ');
-      const statLabel = statLabelParts.join(' ');
-
-      return (
+      { stat: '16', label: 'Events', subLabel: 'Across 8 categories' },
+      { stat: '3', label: 'Live Today', subLabel: 'Join now free' },
+      { stat: '2,400+', label: 'Devs', subLabel: 'Active this month' },
+    ].map(({ stat, label, subLabel }) => (
       <div
-        key={stat}
-        className="stats-card stat-card w-full"
+        key={`${stat}-${label}`}
+        className="stats-card stat-card w-full rounded-xl border border-gray-200 bg-white text-center shadow-sm transition-all sm:rounded-2xl"
         style={{
-          backgroundColor: '#ffffff',
-          border: '1.5px solid #e5e7eb',
-          borderRadius: '16px',
-          padding: '18px 20px',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: '4px',
-          boxShadow: '0 2px 12px rgba(0,0,0,0.05)',
+          padding: '10px 8px',
           transition: 'transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease'
         }}
       >
-        <div style={{ fontSize: '28px', fontWeight: 800, color: '#0f172a', letterSpacing: '-1px' }}>{statNumber}</div>
-        <div style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a' }}>{statLabel}</div>
-        <div style={{ fontSize: '12px', color: '#9ca3af', marginTop: '2px' }}>{subLabel}</div>
+        <div className="text-base font-extrabold leading-none text-slate-900 sm:text-[28px] sm:leading-tight">{stat}</div>
+        <div className="mt-1 text-[11px] font-semibold text-slate-800 sm:mt-0 sm:text-[13px]">{label}</div>
+        <div className="mt-0.5 hidden text-[12px] text-slate-400 sm:block">{subLabel}</div>
       </div>
-      );
-    })}
+    ))}
   </div>
 
-<div className="mt-8 px-0 sm:px-2 lg:px-4">
-<div style={{ textAlign: 'center' }}>
-  <h2 className="text-xl font-semibold text-gray-900">Explore Events</h2>
-  <p className="text-gray-600 mt-2 max-w-xl mx-auto font-normal" style={{ lineHeight: 1.75 }}>Find technical events across cloud, AI, DevOps, and emerging technologies.</p>
+<div className="mt-6 px-0 sm:mt-8 sm:px-2 lg:px-4">
+<div className="text-center">
+  <h2 className="text-2xl font-bold text-gray-900 sm:text-xl sm:font-semibold">Explore Events</h2>
+  <p className="mx-auto mt-1 max-w-xl text-sm text-gray-600 sm:mt-2 sm:text-base" style={{ lineHeight: 1.6 }}>Find technical events across cloud, AI, DevOps, and emerging technologies.</p>
 </div>
-<div className="animate-fade-up delay-3 mt-5 anim-fade-up d2 grid grid-cols-1 gap-3 sm:mt-6 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start sm:gap-4">
-  <div className="min-w-0 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-    <div className="mx-auto flex w-max flex-nowrap items-center gap-3 whitespace-nowrap px-1 sm:w-full sm:flex-wrap sm:justify-center sm:whitespace-normal sm:px-0">
-      {['All', 'Development', 'DevOps', 'AI/ML', 'Cloud', 'Cybersecurity', 'Mobile', 'Web3', 'Backend', 'Design'].map((cat) => (
-        <button
-          key={cat}
-          type="button"
-          onClick={() => setActiveCategory(cat)}
-          aria-pressed={activeCategory === cat}
-          className={`interactive-btn shrink-0 rounded-full border px-4 py-1.5 text-xs font-medium transition-all sm:text-sm ${
-            activeCategory === cat
-              ? 'border-indigo-600 bg-indigo-600 text-white'
-              : 'border-gray-300 bg-transparent text-gray-700 hover:border-indigo-300 hover:text-indigo-600'
-          }`}
-        >
-          {cat}
-        </button>
-      ))}
+<div className="animate-fade-up delay-3 mt-4 anim-fade-up d2 sm:mt-6">
+  <div className="flex items-center gap-2 sm:grid sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start sm:gap-4">
+    <div className="min-w-0 flex-1 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+      <div className="flex w-max flex-nowrap items-center gap-2 whitespace-nowrap px-0.5 sm:w-full sm:flex-wrap sm:justify-center sm:gap-3 sm:whitespace-normal sm:px-0">
+        {['All', 'Development', 'DevOps', 'AI/ML', 'Cloud', 'Cybersecurity', 'Mobile', 'Web3', 'Backend', 'Design'].map((cat) => (
+          <button
+            key={cat}
+            type="button"
+            onClick={() => setActiveCategory(cat)}
+            aria-pressed={activeCategory === cat}
+            className={`interactive-btn shrink-0 rounded-full border px-4 py-1.5 text-xs font-medium transition-all sm:text-sm ${
+              activeCategory === cat
+                ? 'border-indigo-600 bg-indigo-600 text-white'
+                : 'border-gray-300 bg-transparent text-gray-700 hover:border-indigo-300 hover:text-indigo-600'
+            }`}
+          >
+            {cat}
+          </button>
+        ))}
+      </div>
     </div>
-  </div>
 
-  <div className="sm:justify-self-end">
-    <button
-      type="button"
-      onClick={() => setShowFilters(!showFilters)}
-      className={`interactive-btn animate-fade-up delay-4 anim-fade-up d3 inline-flex h-10 w-10 items-center justify-center rounded-full border shadow-sm transition-all sm:h-auto sm:w-auto sm:gap-1.5 sm:px-4 sm:py-2.5 ${
-        showFilters
-          ? 'border-indigo-600 bg-indigo-600 text-white'
-          : 'border-indigo-600 bg-white text-indigo-600 hover:bg-indigo-50'
-      }`}
-      aria-label={showFilters ? 'Hide advanced filters' : 'Show advanced filters'}
-    >
-      <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true">
-        <line x1="4" y1="6" x2="20" y2="6" />
-        <line x1="8" y1="12" x2="16" y2="12" />
-        <line x1="11" y1="18" x2="13" y2="18" />
-      </svg>
-      <span className="hidden text-sm font-semibold sm:inline">{showFilters ? 'Hide Filters' : 'Advanced Filters'}</span>
-    </button>
+    <div className="shrink-0 self-end sm:justify-self-end sm:self-auto">
+      <button
+        type="button"
+        onClick={() => setShowFilters(!showFilters)}
+        className={`interactive-btn animate-fade-up delay-4 anim-fade-up d3 inline-flex h-9 items-center justify-center gap-1.5 rounded-full border px-3 shadow-sm transition-all sm:h-auto sm:px-4 sm:py-2.5 ${
+          showFilters
+            ? 'border-indigo-600 bg-indigo-600 text-white'
+            : 'border-indigo-600 bg-white text-indigo-600 hover:bg-indigo-50'
+        }`}
+        aria-label={showFilters ? 'Hide advanced filters' : 'Show advanced filters'}
+      >
+        <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true">
+          <line x1="4" y1="6" x2="20" y2="6" />
+          <line x1="8" y1="12" x2="16" y2="12" />
+          <line x1="11" y1="18" x2="13" y2="18" />
+        </svg>
+        <span className="hidden text-sm font-semibold sm:inline">{showFilters ? 'Hide Filters' : 'Advanced Filters'}</span>
+      </button>
+    </div>
   </div>
 </div>
 

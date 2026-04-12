@@ -82,12 +82,6 @@ function SidebarContent({
 }) {
   return (
     <div className={condensed ? 'px-2 pb-4' : 'px-3 pb-6'}>
-      {!condensed && (
-        <div className="mb-4 px-2 pt-2 text-lg font-extrabold tracking-tight text-slate-900">
-          VickyBytes
-        </div>
-      )}
-
       {sections.map((section) => (
         <div key={section.title ?? 'main'} className="mb-4">
           {!condensed && section.title && (

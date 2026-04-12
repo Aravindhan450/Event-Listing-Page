@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import VideoPlayer from '../ui/VideoPlayer';
 import LiveChat from './LiveChat';
 import Navbar from '../ui/Navbar';
@@ -13,15 +14,164 @@ type EventPageProps = {
   id: string;
 };
 
+type SidebarItem = {
+  id: string;
+  label: string;
+  icon: string;
+  kind: 'route' | 'query' | 'static';
+  value?: string;
+};
+
+type SidebarSection = {
+  title?: string;
+  items: SidebarItem[];
+};
+
+const SIDEBAR_SECTIONS: SidebarSection[] = [
+  {
+    items: [
+      { id: 'home', label: 'Home', icon: 'home', kind: 'route', value: '/' },
+      { id: 'explore-events', label: 'Explore Events', icon: 'travel_explore', kind: 'route', value: '/events' },
+      { id: 'live-events', label: 'Live Events', icon: 'radio_button_checked', kind: 'query', value: 'live' },
+    ],
+  },
+  {
+    title: 'My Activity',
+    items: [
+      { id: 'saved-events', label: 'Saved Events', icon: 'star', kind: 'static' },
+      { id: 'registered-events', label: 'Registered Events', icon: 'event', kind: 'static' },
+      { id: 'watch-later', label: 'Watch Later', icon: 'schedule', kind: 'static' },
+    ],
+  },
+  {
+    title: 'Explore',
+    items: [
+      { id: 'cloud', label: 'Cloud', icon: 'cloud', kind: 'query', value: 'Cloud' },
+      { id: 'ai-ml', label: 'AI / ML', icon: 'psychology', kind: 'query', value: 'AI/ML' },
+      { id: 'devops', label: 'DevOps', icon: 'settings', kind: 'query', value: 'DevOps' },
+      { id: 'cybersecurity', label: 'Cybersecurity', icon: 'shield_lock', kind: 'query', value: 'Cybersecurity' },
+      { id: 'web3', label: 'Web3', icon: 'language', kind: 'query', value: 'Web3' },
+      { id: 'backend', label: 'Backend', icon: 'dns', kind: 'query', value: 'Backend' },
+    ],
+  },
+];
+
+function SidebarContent({
+  sections,
+  activeItemId,
+  condensed,
+  onSelect,
+}: {
+  sections: SidebarSection[];
+  activeItemId: string;
+  condensed?: boolean;
+  onSelect: (item: SidebarItem) => void;
+}) {
+  return (
+    <div className={condensed ? 'px-2 pb-4' : 'px-3 pb-6'}>
+      {sections.map((section) => (
+        <div key={section.title ?? 'main'} className="mb-4">
+          {!condensed && section.title && (
+            <div className="px-2 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+              {section.title}
+            </div>
+          )}
+
+          <div className="space-y-1">
+            {section.items.map((item) => {
+              const isActive = activeItemId === item.id;
+              const isLive = item.id === 'live-events';
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => onSelect(item)}
+                  aria-label={item.label}
+                  className={`flex w-full items-center rounded-xl transition-colors ${
+                    condensed ? 'justify-center px-2 py-2.5' : 'gap-3 px-3 py-2.5'
+                  } ${
+                    isActive
+                      ? 'bg-indigo-100 text-indigo-700'
+                      : 'text-slate-700 hover:bg-slate-200/70'
+                  }`}
+                >
+                  <span
+                    className={`material-symbols-outlined text-[20px] ${
+                      isLive ? 'text-red-500' : isActive ? 'text-indigo-700' : 'text-slate-500'
+                    }`}
+                  >
+                    {item.icon}
+                  </span>
+                  {!condensed && <span className="truncate text-sm font-medium">{item.label}</span>}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function EventPage({ id }: EventPageProps) {
   const [isMobileChatOpen, setIsMobileChatOpen] = useState(false);
   const [isTabletChatOpen, setIsTabletChatOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [manualActiveItemId, setManualActiveItemId] = useState<string | null>(null);
   const [desktopChatHeight, setDesktopChatHeight] = useState<number | null>(null);
   const leftContentRef = useRef<HTMLElement | null>(null);
   const allEvents = events as Event[];
   const { query, setQuery } = useEventSearch(allEvents);
+  const pathname = usePathname();
+  const router = useRouter();
   const parsedId = parseInt(id, 10);
   const matchedEvent = allEvents.find((e) => e.id === parsedId);
+  const normalizedQuery = query.trim().toLowerCase();
+
+  const derivedActiveItemId = useMemo(() => {
+    if (pathname === '/') {
+      return 'home';
+    }
+
+    if (pathname.startsWith('/events/') && !normalizedQuery) {
+      return 'explore-events';
+    }
+
+    const matched = SIDEBAR_SECTIONS.flatMap((section) => section.items).find((item) => {
+      if (item.kind !== 'query') {
+        return false;
+      }
+      return (item.value ?? '').toLowerCase() === normalizedQuery;
+    });
+
+    return matched?.id ?? '';
+  }, [normalizedQuery, pathname]);
+
+  const activeItemId = derivedActiveItemId || manualActiveItemId || '';
+
+  const handleSidebarSelect = (item: SidebarItem) => {
+    if (item.kind === 'route') {
+      setManualActiveItemId(null);
+      setIsSidebarOpen(false);
+      router.push(item.value ?? '/events');
+      return;
+    }
+
+    if (item.kind === 'query') {
+      setManualActiveItemId(null);
+      setQuery(item.value ?? '');
+      setIsSidebarOpen(false);
+      if (!pathname.startsWith('/events')) {
+        router.push('/events');
+      } else if (pathname !== '/events') {
+        router.push('/events');
+      }
+      return;
+    }
+
+    setManualActiveItemId(item.id);
+    setIsSidebarOpen(false);
+  };
 
   useEffect(() => {
     const leftColumn = leftContentRef.current;
@@ -100,7 +250,74 @@ export default function EventPage({ id }: EventPageProps) {
         placeholder="Search events by title, category, description, or tags..."
       />
 
-      <main className="mx-auto w-full max-w-370 overflow-x-hidden px-4 pb-6 pt-4 sm:px-6 sm:pb-8 sm:pt-5 lg:px-8 lg:pb-10 lg:pt-6">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 overflow-y-auto border-r border-slate-200 bg-slate-50/95 pb-5 pt-[76px] backdrop-blur lg:block">
+        <SidebarContent
+          sections={SIDEBAR_SECTIONS}
+          activeItemId={activeItemId}
+          onSelect={handleSidebarSelect}
+        />
+      </aside>
+
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-16 overflow-y-auto border-r border-slate-200 bg-slate-50/95 pb-5 pt-[76px] md:block lg:hidden">
+        <div className="px-2 pb-2">
+          <button
+            type="button"
+            aria-label="Open navigation"
+            onClick={() => setIsSidebarOpen(true)}
+            className="flex w-full items-center justify-center rounded-xl px-2 py-2.5 text-slate-700 transition-colors hover:bg-slate-200/70"
+          >
+            <span className="material-symbols-outlined text-[20px]">menu</span>
+          </button>
+        </div>
+        <SidebarContent
+          sections={SIDEBAR_SECTIONS}
+          activeItemId={activeItemId}
+          condensed
+          onSelect={handleSidebarSelect}
+        />
+      </aside>
+
+      {isSidebarOpen && (
+        <div className="fixed inset-0 z-[1200] lg:hidden">
+          <button
+            type="button"
+            aria-label="Close navigation drawer"
+            onClick={() => setIsSidebarOpen(false)}
+            className="absolute inset-0 bg-black/40"
+          />
+          <aside className="absolute left-0 top-0 h-full w-[240px] overflow-y-auto border-r border-slate-200 bg-slate-50 shadow-xl">
+            <div className="flex items-center justify-between border-b border-slate-200 px-4 py-4">
+              <span className="text-base font-bold tracking-tight text-slate-900">Navigation</span>
+              <button
+                type="button"
+                aria-label="Close navigation"
+                onClick={() => setIsSidebarOpen(false)}
+                className="inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-600 hover:bg-slate-200/70"
+              >
+                <span className="material-symbols-outlined text-[20px]">close</span>
+              </button>
+            </div>
+            <SidebarContent
+              sections={SIDEBAR_SECTIONS}
+              activeItemId={activeItemId}
+              onSelect={handleSidebarSelect}
+            />
+          </aside>
+        </div>
+      )}
+
+      <main className="mx-auto w-full max-w-370 overflow-x-hidden px-4 pb-6 pt-4 sm:px-6 sm:pb-8 sm:pt-5 md:ml-16 lg:ml-60 lg:px-8 lg:pb-10 lg:pt-6">
+        <div className="mb-3 flex items-center justify-between lg:hidden">
+          <button
+            type="button"
+            onClick={() => setIsSidebarOpen(true)}
+            className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
+          >
+            <span className="material-symbols-outlined text-[18px]">menu</span>
+            Browse
+          </button>
+        </div>
+
         <div className="event-page-layout grid grid-cols-1 items-start gap-4 sm:gap-6 lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
           <section ref={leftContentRef} className="min-w-0">
             <div className="anim-scale-in d1 animate-scale-in mb-3 w-full sm:mb-4">
